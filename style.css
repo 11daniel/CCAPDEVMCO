@@ -116,7 +116,7 @@ img {
   top: 0;
   left: 0;
   width: 100%;
-  background: var(--main-red);
+  background: var(--main-gray);
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
   z-index: 10;
 }
@@ -176,7 +176,8 @@ img {
 .projects-section {
   text-align: center;
   padding: 10rem 2rem;
-  background: var(--main-pink);
+  /* background: var(--main-pink); */
+  background-image: linear-gradient(62deg, #6666ff 0%, #0000b3 100%);
 }
 
 .projects-section-header {
