@@ -155,9 +155,9 @@ img {
   align-items: center;
   width: 100%;
   height: 100vh;
-  background-color: #000;
-  background-image: /*linear-gradient(62deg, #3a3d40 0%, #181719 100%)*/ url("2.png");
-  background-size: 1640px 920px;
+  background-color: white;
+  background-image: /*linear-gradient(62deg, #3a3d40 0%, #181719 100%)*/ url("logo.png");
+  /* background-size: 1640px 920px; */
 }
 
 .welcome-section > p {
@@ -285,6 +285,11 @@ img {
   color: var(--main-red);
 }
 
+#vid-section > iframe {
+  max-width: 560px;
+  width: 100%;
+}
+
 /*Mock-election*/
 
 .results-section {
@@ -376,17 +381,4 @@ footer i {
     flex-direction: column;
     text-align: center;
   }
-}
-
-/* Howie Severino Interview */
-
-#vid-section {
-  /*margin-top: 50px;*/
-  display: flex;
-  justify-content: center;
-}
-
-#vid-section > iframe {
-  max-width: 560px;
-  width: 100%;
 }
