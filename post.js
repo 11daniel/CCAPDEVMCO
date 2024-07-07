@@ -33,31 +33,33 @@ $(document).ready(function () {
     postList.empty();
     initialPosts.forEach((post, index) => {
       const postElement = `
-      <li class="post" data-index="${index}">
-        <div class="user">
-          <img src="${post.avatar}" alt="User Avatar">
-          <span>${post.user}</span>
-        </div>
-        <div class="content">
-          <h3><a target='_blank'>${post.title}</a></h3>
-          <p>Posted by ${post.user} | ${post.timestamp}</p>
-          <p>${post.content}</p>
-          <div class="voting">
-            <button class="upvote-button">Upvote</button>
-            <button class="downvote-button">Downvote</button>
+        <li class="post" data-index="${index}">
+          <div class="user">
+            <img src="${post.avatar}" alt="User Avatar">
+            <span>${post.user}</span>
           </div>
-          <div class="comment-section">
-            <ul class="comment-list">
-              ${post.comments.map(comment => `<li class="comment">${comment}</li>`).join('')}
-            </ul>
-            <form class="comment-form">
-              <textarea name="commentText" placeholder="Add a comment..."></textarea>
-              <button type="submit">Submit</button>
-            </form>
+          <div class="content">
+            <h3><a target='_blank'>${post.title}</a></h3>
+            <p>Posted by ${post.user} | ${post.timestamp}</p>
+            <p>${post.content}</p>
+            <div class="voting">
+              <button class="upvote-button">Upvote</button>
+              <span class="vote-counter">0</span> <!-- Vote counter element -->
+              <button class="downvote-button">Downvote</button>
+            </div>
+            <div class="comment-section">
+              <ul class="comment-list">
+                ${post.comments.map(comment => `<li class="comment">${comment}</li>`).join('')}
+              </ul>
+              <form class="comment-form">
+                <textarea name="commentText" placeholder="Add a comment..."></textarea>
+                <button type="submit">Submit</button>
+              </form>
+            </div>
           </div>
-        </div>
-      </li>
-    `;
+        </li>
+      `;
+
       postList.append(postElement);
     });
   }
@@ -98,25 +100,28 @@ $(document).ready(function () {
   $('#post-list').on('submit', '.comment-form', handleNewComment);
   
   // Function to handle upvote
-  function handleUpvote(event) {
-    event.preventDefault();
-    const postIndex = $(this).closest('.post').data('index');
-    // Perform upvote action, e.g., increment vote count or update database
-    console.log(`Upvoted post with index ${postIndex}`);
-  }
+function handleUpvote(event) {
+  event.preventDefault();
+  const postIndex = $(this).closest('.post').data('index');
+  const voteCounter = $(this).siblings('.vote-counter');
+  let currentCount = parseInt(voteCounter.text());
+  voteCounter.text(currentCount + 1); // Increment vote count
+}
 
-  // Function to handle downvote
-  function handleDownvote(event) {
-    event.preventDefault();
-    const postIndex = $(this).closest('.post').data('index');
-    // Perform downvote action, e.g., decrement vote count or update database
-    console.log(`Downvoted post with index ${postIndex}`);
-  }
+// Function to handle downvote
+function handleDownvote(event) {
+  event.preventDefault();
+  const postIndex = $(this).closest('.post').data('index');
+  const voteCounter = $(this).siblings('.vote-counter');
+  let currentCount = parseInt(voteCounter.text());
+  voteCounter.text(currentCount - 1); // Decrement vote count
+}
 
-  // Event listener for upvote button
-  $('#post-list').on('click', '.upvote-button', handleUpvote);
+// Event listener for upvote button
+$('#post-list').on('click', '.upvote-button', handleUpvote);
 
-  // Event listener for downvote button
-  $('#post-list').on('click', '.downvote-button', handleDownvote);
+// Event listener for downvote button
+$('#post-list').on('click', '.downvote-button', handleDownvote);
+
 
 });
