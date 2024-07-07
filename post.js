@@ -44,8 +44,9 @@ $(document).ready(function () {
             <p>${post.content}</p>
             <div class="voting">
               <button class="upvote-button">Upvote</button>
-              <span class="vote-counter">0</span> <!-- Vote counter element -->
+              <span class="upvote-counter">0</span> <!-- Upvote counter element -->
               <button class="downvote-button">Downvote</button>
+              <span class="downvote-counter">0</span> <!-- Downvote counter element -->
             </div>
             <div class="comment-section">
               <ul class="comment-list">
@@ -59,6 +60,7 @@ $(document).ready(function () {
           </div>
         </li>
       `;
+
 
       postList.append(postElement);
     });
@@ -98,30 +100,31 @@ $(document).ready(function () {
 
   // Event listener for new comment submission
   $('#post-list').on('submit', '.comment-form', handleNewComment);
-  
+
   // Function to handle upvote
-function handleUpvote(event) {
-  event.preventDefault();
-  const postIndex = $(this).closest('.post').data('index');
-  const voteCounter = $(this).siblings('.vote-counter');
-  let currentCount = parseInt(voteCounter.text());
-  voteCounter.text(currentCount + 1); // Increment vote count
-}
+  function handleUpvote(event) {
+    event.preventDefault();
+    const postIndex = $(this).closest('.post').data('index');
+    const upvoteCounter = $(this).siblings('.upvote-counter');
+    let currentCount = parseInt(upvoteCounter.text());
+    upvoteCounter.text(currentCount + 1); // Increment upvote count
+  }
 
-// Function to handle downvote
-function handleDownvote(event) {
-  event.preventDefault();
-  const postIndex = $(this).closest('.post').data('index');
-  const voteCounter = $(this).siblings('.vote-counter');
-  let currentCount = parseInt(voteCounter.text());
-  voteCounter.text(currentCount - 1); // Decrement vote count
-}
+  // Function to handle downvote
+  function handleDownvote(event) {
+    event.preventDefault();
+    const postIndex = $(this).closest('.post').data('index');
+    const downvoteCounter = $(this).siblings('.downvote-counter');
+    let currentCount = parseInt(downvoteCounter.text());
+    downvoteCounter.text(currentCount + 1); // Increment downvote count
+  }
 
-// Event listener for upvote button
-$('#post-list').on('click', '.upvote-button', handleUpvote);
+  // Event listener for upvote button
+  $('#post-list').on('click', '.upvote-button', handleUpvote);
 
-// Event listener for downvote button
-$('#post-list').on('click', '.downvote-button', handleDownvote);
+  // Event listener for downvote button
+  $('#post-list').on('click', '.downvote-button', handleDownvote);
+
 
 
 });
