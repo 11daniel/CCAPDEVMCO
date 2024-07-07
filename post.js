@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
   // Initial posts
   const initialPosts = [
     {
@@ -33,27 +33,31 @@ $(document).ready(function() {
     postList.empty();
     initialPosts.forEach((post, index) => {
       const postElement = `
-        <li class="post" data-index="${index}">
-          <div class="user">
-            <img src="${post.avatar}" alt="User Avatar">
-            <span>${post.user}</span>
+      <li class="post" data-index="${index}">
+        <div class="user">
+          <img src="${post.avatar}" alt="User Avatar">
+          <span>${post.user}</span>
+        </div>
+        <div class="content">
+          <h3><a target='_blank'>${post.title}</a></h3>
+          <p>Posted by ${post.user} | ${post.timestamp}</p>
+          <p>${post.content}</p>
+          <div class="voting">
+            <button class="upvote-button">Upvote</button>
+            <button class="downvote-button">Downvote</button>
           </div>
-          <div class="content">
-            <h3><a target='_blank'>${post.title}</a></h3>
-            <p>Posted by ${post.user} | ${post.timestamp}</p>
-            <p>${post.content}</p>
-            <div class="comment-section">
-              <ul class="comment-list">
-                ${post.comments.map(comment => `<li class="comment">${comment}</li>`).join('')}
-              </ul>
-              <form class="comment-form">
-                <textarea name="commentText" placeholder="Add a comment..."></textarea>
-                <button type="submit">Submit</button>
-              </form>
-            </div>
+          <div class="comment-section">
+            <ul class="comment-list">
+              ${post.comments.map(comment => `<li class="comment">${comment}</li>`).join('')}
+            </ul>
+            <form class="comment-form">
+              <textarea name="commentText" placeholder="Add a comment..."></textarea>
+              <button type="submit">Submit</button>
+            </form>
           </div>
-        </li>
-      `;
+        </div>
+      </li>
+    `;
       postList.append(postElement);
     });
   }
