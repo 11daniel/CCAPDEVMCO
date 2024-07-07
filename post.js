@@ -96,4 +96,27 @@ $(document).ready(function () {
 
   // Event listener for new comment submission
   $('#post-list').on('submit', '.comment-form', handleNewComment);
+  
+  // Function to handle upvote
+  function handleUpvote(event) {
+    event.preventDefault();
+    const postIndex = $(this).closest('.post').data('index');
+    // Perform upvote action, e.g., increment vote count or update database
+    console.log(`Upvoted post with index ${postIndex}`);
+  }
+
+  // Function to handle downvote
+  function handleDownvote(event) {
+    event.preventDefault();
+    const postIndex = $(this).closest('.post').data('index');
+    // Perform downvote action, e.g., decrement vote count or update database
+    console.log(`Downvoted post with index ${postIndex}`);
+  }
+
+  // Event listener for upvote button
+  $('#post-list').on('click', '.upvote-button', handleUpvote);
+
+  // Event listener for downvote button
+  $('#post-list').on('click', '.downvote-button', handleDownvote);
+
 });
