@@ -22,3 +22,8 @@ fs.readFile('index.handlebars', 'utf-8', (err, data) => {
   const result = template(context);
   console.log(result);
 });
+
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log('Listening to port 3000');
+});
