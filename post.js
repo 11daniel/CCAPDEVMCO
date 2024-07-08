@@ -103,7 +103,7 @@ $(document).ready(function () {
   }
 
   // Initial render of posts
-  renderPosts(initialPosts);
+  renderPosts(initialPosts); 
 
   // Event listener for new post submission
   $('#new-post-form').on('submit', handleNewPost);
