@@ -1,6 +1,13 @@
 const handlebars = require('handlebars');
 const fs = require('fs');
 
+var express = require('express'); 
+const path = require('path');
+var app = express();
+
+var bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: false}));
+
 // Read the Handlebars file
 fs.readFile('index.handlebars', 'utf-8', (err, data) => {
   if (err) {
@@ -23,7 +30,7 @@ fs.readFile('index.handlebars', 'utf-8', (err, data) => {
   console.log(result);
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log('Listening to port 3000');
+var server = app.listen(5000, function()
+{
+    console.log("Listening at port 5000");
 });
