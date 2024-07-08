@@ -13,7 +13,7 @@ fs.readFile('index.handlebars', 'utf-8', (err, data) => {
 
   // Define the data to be passed to the template
   const context = {
-    pageTitle: 'Your Page Title',
+    pageTitle: 'Peaky Coders',
     currentYear: new Date().getFullYear()
     // Add more dynamic data as needed
   };
