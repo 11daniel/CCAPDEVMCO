@@ -76,7 +76,7 @@ body, html {
 }
 
 .background {
-  background: linear-gradient(to right, #288757, #b1ffd8);
+  background: linear-gradient(to right, #303841, #45567d);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -184,7 +184,7 @@ body, html {
   margin-left: 10%;
   margin-bottom: 15px;
   border-radius: 30px;
-  background-color:   #47e48b;
+  background-color:   #45567d;
   color: white;
   font-size: 12px;
   font-weight: 800;
@@ -194,7 +194,7 @@ body, html {
 }
 
 .login-button:hover {
-  background-color: #3ba674;
+  background-color: #303841;
 }
 
 #signup {
