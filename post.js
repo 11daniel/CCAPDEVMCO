@@ -7,7 +7,10 @@ $(document).ready(function () {
       title: 'Help Needed with CSS Flexbox',
       content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc. Sed euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc.',
       timestamp: '2 hours ago',
-      comments: ['Great post!', 'Very helpful, thanks!']
+      comments: ['Great post!', 'Very helpful, thanks!'],
+      upvotes: 10,
+      downvotes: 2,
+      voted: null // null: no vote, 'up': upvoted, 'down': downvoted
     },
     {
       user: 'BobRoss',
@@ -15,7 +18,10 @@ $(document).ready(function () {
       title: 'How to Use JavaScript Promises',
       content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc. Sed euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc.',
       timestamp: '2 days ago',
-      comments: []
+      comments: [],
+      upvotes: 5,
+      downvotes: 1,
+      voted: null
     },
     {
       user: 'JaneSmith',
@@ -23,15 +29,18 @@ $(document).ready(function () {
       title: 'Best Practices for Responsive Web Design',
       content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc. Sed euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc.',
       timestamp: '5 weeks ago',
-      comments: []
+      comments: [],
+      upvotes: 3,
+      downvotes: 0,
+      voted: null
     }
   ];
 
   // Function to render posts
-  function renderPosts() {
+  function renderPosts(posts) {
     const postList = $('#post-list');
     postList.empty();
-    initialPosts.forEach((post, index) => {
+    posts.forEach((post, index) => {
       const postElement = `
         <li class="post" data-index="${index}">
           <div class="user">
@@ -43,10 +52,10 @@ $(document).ready(function () {
             <p>Posted by ${post.user} | ${post.timestamp}</p>
             <p>${post.content}</p>
             <div class="voting">
-              <button class="upvote-button">Upvote</button>
-              <span class="upvote-counter">0</span> <!-- Upvote counter element -->
-              <button class="downvote-button">Downvote</button>
-              <span class="downvote-counter">0</span> <!-- Downvote counter element -->
+              <button class="upvote-button">${post.voted === 'up' ? 'Upvoted' : 'Upvote'}</button>
+              <span class="upvote-counter">${post.upvotes}</span> <!-- Upvote counter element -->
+              <button class="downvote-button">${post.voted === 'down' ? 'Downvoted' : 'Downvote'}</button>
+              <span class="downvote-counter">${post.downvotes}</span> <!-- Downvote counter element -->
             </div>
             <div class="comment-section">
               <ul class="comment-list">
@@ -60,8 +69,6 @@ $(document).ready(function () {
           </div>
         </li>
       `;
-
-
       postList.append(postElement);
     });
   }
@@ -75,10 +82,13 @@ $(document).ready(function () {
       title: $('#new-post-title').val(),
       content: $('#new-post-content').val(),
       timestamp: 'Just now',
-      comments: []
+      comments: [],
+      upvotes: 0,
+      downvotes: 0,
+      voted: null
     };
     initialPosts.push(newPost);
-    renderPosts();
+    renderPosts(initialPosts);
   }
 
   // Function to handle new comment submission
@@ -88,12 +98,12 @@ $(document).ready(function () {
     const postIndex = $(this).closest('.post').data('index');
     if (commentText) {
       initialPosts[postIndex].comments.push(commentText);
-      renderPosts();
+      renderPosts(initialPosts);
     }
   }
 
   // Initial render of posts
-  renderPosts();
+  renderPosts(initialPosts);
 
   // Event listener for new post submission
   $('#new-post-form').on('submit', handleNewPost);
@@ -105,18 +115,40 @@ $(document).ready(function () {
   function handleUpvote(event) {
     event.preventDefault();
     const postIndex = $(this).closest('.post').data('index');
-    const upvoteCounter = $(this).siblings('.upvote-counter');
-    let currentCount = parseInt(upvoteCounter.text());
-    upvoteCounter.text(currentCount + 1); // Increment upvote count
+    const post = initialPosts[postIndex];
+    
+    if (post.voted === 'up') {
+      post.upvotes--;
+      post.voted = null;
+    } else {
+      if (post.voted === 'down') {
+        post.downvotes--;
+      }
+      post.upvotes++;
+      post.voted = 'up';
+    }
+    
+    renderPosts(initialPosts);
   }
 
   // Function to handle downvote
   function handleDownvote(event) {
     event.preventDefault();
     const postIndex = $(this).closest('.post').data('index');
-    const downvoteCounter = $(this).siblings('.downvote-counter');
-    let currentCount = parseInt(downvoteCounter.text());
-    downvoteCounter.text(currentCount + 1); // Increment downvote count
+    const post = initialPosts[postIndex];
+    
+    if (post.voted === 'down') {
+      post.downvotes--;
+      post.voted = null;
+    } else {
+      if (post.voted === 'up') {
+        post.upvotes--;
+      }
+      post.downvotes++;
+      post.voted = 'down';
+    }
+    
+    renderPosts(initialPosts);
   }
 
   // Event listener for upvote button
@@ -125,6 +157,29 @@ $(document).ready(function () {
   // Event listener for downvote button
   $('#post-list').on('click', '.downvote-button', handleDownvote);
 
+  // Show back-to-top button when scrolled down
+  $(window).scroll(function() {
+    if ($(this).scrollTop() > 300) {
+      $('#back-to-top').fadeIn();
+    } else {
+      $('#back-to-top').fadeOut();
+    }
+  });
 
+  // Scroll back to top when button is clicked
+  $('#back-to-top').click(function() {
+    $('html, body').animate({scrollTop: 0}, 600);
+    return false;
+  });
 
+  // Event listeners for filter buttons
+  $('#latest-posts').click(function() {
+    const latestPosts = initialPosts.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    renderPosts(latestPosts);
+  });
+
+  $('#popular-posts').click(function() {
+    const popularPosts = initialPosts.slice().sort((a, b) => b.upvotes - a.upvotes);
+    renderPosts(popularPosts);
+  });
 });
