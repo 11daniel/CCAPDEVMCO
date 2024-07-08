@@ -70,7 +70,6 @@ header h1 {
   padding: 0px 15px;
 }
 
-
 main {
   display: flex;
   justify-content: space-between;
@@ -78,7 +77,6 @@ main {
   max-width: 1200px;
   margin: 0 auto;
 }
-
 
 .posts {
   flex-basis: 70%;
@@ -88,6 +86,24 @@ main {
 .posts h2 {
   margin-bottom: 15px;
   font-size: 2rem;
+}
+
+.filter-buttons {
+  margin-bottom: 15px;
+}
+
+.filter-btn {
+  background-color: var(--main-blue);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.filter-btn:hover {
+  background-color: var(--main-red);
 }
 
 .posts ul {
@@ -148,6 +164,26 @@ footer {
   box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.2);
 }
 
+#back-to-top {
+  display: none; /* Hidden by default */
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 99;
+  font-size: 18px;
+  border: none;
+  outline: none;
+  background-color: var(--main-blue);
+  color: white;
+  cursor: pointer;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+#back-to-top:hover {
+  background-color: var(--main-red);
+}
+
 @media (max-width: 768px) {
   .nav-list {
     flex-direction: column;
@@ -174,7 +210,6 @@ footer {
     flex-basis: 100%;
   }
 }
-
 
 .comment-section {
   margin-top: 20px;
@@ -214,4 +249,3 @@ footer {
 .comment-form button:hover {
   background-color: #1f2021;
 }
-
