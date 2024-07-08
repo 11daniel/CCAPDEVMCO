@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peaky Coders Forum</title>
+  <link rel="stylesheet" href="forum.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1>Welcome to the Peaky Coders Forum</h1>
+  </header>
+  <nav id="navbar" class="nav">
+    <ul class="nav-list">
+      <li>
+        <a href="index.html" class="nava">Home</a>
+      </li>
+      <li>
+        <a href="forum.html" class="nava">Forum</a>
+      </li>
+      <li>
+        <a href="register.html" class="nava">
+          <i class="fas fa-user"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <main>
+
+    <section class="posts">
+      <h2>Recent Posts</h2>
+      <ul id="post-list">
+        <!-- Posts will be inserted here by JS -->
+      </ul>
+    </section>
+
+    <section class="new-post">
+      <h2>Create New Post</h2>
+      <form id="new-post-form">
+        <input type="text" id="new-post-title" placeholder="Post Title" required>
+        <textarea id="new-post-content" placeholder="Post Content" required></textarea>
+        <button type="submit">Submit</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 Peaky Coders. All rights reserved.</p>
+  </footer>
+  <script src="userpost.js"></script>
+</body>
+
+</html>
