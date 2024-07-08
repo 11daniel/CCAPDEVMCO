@@ -50,7 +50,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Open Sans', sans-serif;
-  background-color: #7bedb9;
+  background-color: #45567d;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -112,7 +112,7 @@ input[type="password"] {
   background-color: rgba(255, 255, 255, 0.8);
 }
 .register-button {
-  background-color: #58b89b;
+  background-color: #45567d;
   color: #fff;
   border: none;
   padding: 15px 20px;
@@ -123,12 +123,12 @@ input[type="password"] {
   z-index: 2;
 }
 .register-button:hover {
-  background-color: #327e64;
+  background-color: #303841;
 }
 .login-link {
   display: block;
   margin-top: 20px;
-  color: #249179;
+  color: #303841;
   text-decoration: none;
   position: relative;
   z-index: 2;
