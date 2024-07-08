@@ -61,10 +61,6 @@ $(document).ready(function () {
               <ul class="comment-list">
                 ${post.comments.map(comment => `<li class="comment">${comment}</li>`).join('')}
               </ul>
-              <form class="comment-form">
-                <textarea name="commentText" placeholder="Add a comment..."></textarea>
-                <button type="submit">Submit</button>
-              </form>
             </div>
           </div>
         </li>
@@ -91,25 +87,11 @@ $(document).ready(function () {
     renderPosts(initialPosts);
   }
 
-  // Function to handle new comment submission
-  function handleNewComment(event) {
-    event.preventDefault();
-    const commentText = $(this).find('textarea[name="commentText"]').val();
-    const postIndex = $(this).closest('.post').data('index');
-    if (commentText) {
-      initialPosts[postIndex].comments.push(commentText);
-      renderPosts(initialPosts);
-    }
-  }
-
   // Initial render of posts
   renderPosts(initialPosts);
 
   // Event listener for new post submission
   $('#new-post-form').on('submit', handleNewPost);
-
-  // Event listener for new comment submission
-  $('#post-list').on('submit', '.comment-form', handleNewComment);
 
   // Function to handle upvote
   function handleUpvote(event) {
