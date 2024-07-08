@@ -2,10 +2,10 @@ $(document).ready(function () {
   // Initial posts
   const initialPosts = [
     {
-      user: 'JohnDoe',
+      user: 'Joshy',
       avatar: 'user-avatar.jpg',
-      title: 'Help Needed with CSS Flexbox',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc. Sed euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc.',
+      title: 'Help Needed with CSS',
+      content: 'Whats the best design for this',
       timestamp: '2 hours ago',
       comments: ['Great post!', 'Very helpful, thanks!'],
       upvotes: 10,
@@ -13,10 +13,10 @@ $(document).ready(function () {
       voted: null // null: no vote, 'up': upvoted, 'down': downvoted
     },
     {
-      user: 'BobRoss',
+      user: 'Carly',
       avatar: 'user-avatar.jpg',
-      title: 'How to Use JavaScript Promises',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc. Sed euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc.',
+      title: 'How to Use JavaScript',
+      content: 'I cant seem to make this work',
       timestamp: '2 days ago',
       comments: [],
       upvotes: 5,
@@ -24,10 +24,10 @@ $(document).ready(function () {
       voted: null
     },
     {
-      user: 'JaneSmith',
+      user: 'Danny',
       avatar: 'user-avatar.jpg',
-      title: 'Best Practices for Responsive Web Design',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc. Sed euismod, nisl ac ultrices aliquam, nunc nunc lacinia nunc, id aliquet nunc nunc vitae nunc.',
+      title: 'Can someone guide me on my CCAPDEV',
+      content: 'I have been absent for 3 sessions and I need to keep up with the lessons',
       timestamp: '5 weeks ago',
       comments: [],
       upvotes: 3,
@@ -103,7 +103,7 @@ $(document).ready(function () {
   }
 
   // Initial render of posts
-  renderPosts(initialPosts); 
+  renderPosts(initialPosts);
 
   // Event listener for new post submission
   $('#new-post-form').on('submit', handleNewPost);
