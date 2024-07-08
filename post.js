@@ -3,7 +3,7 @@ $(document).ready(function () {
   const initialPosts = [
     {
       user: 'Joshy',
-      avatar: 'user-avatar.jpg',
+      avatar: 'JoshProfile.jpg',
       title: 'Help Needed with CSS',
       content: 'Whats the best design for this',
       timestamp: '2 hours ago',
