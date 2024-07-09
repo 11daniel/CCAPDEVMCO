@@ -13,7 +13,7 @@ app.use(
         saveUninitialized: false,
     })
 );
-
+app.use(express.static(__dirname + '/public'));
 const user1 = {
     name: "Art",
     quote: "Hello! I'm Art!"
@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
         res.render('homepage',{userData});
     }
     else{
-        res.sendFile(__dirname + "/index.html");
+        res.sendFile(__dirname + "/login.html");
     }
 });
  
