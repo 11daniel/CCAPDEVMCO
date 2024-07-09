@@ -15,15 +15,17 @@ app.use(
 );
 app.use(express.static(__dirname + '/public'));
 const user1 = {
-    name: "Art",
-    quote: "Hello! I'm Art!"
+    username: "Art",
+    password: "Hello! I'm Art!",
+    email: "art@art.com"
 }; 
 
 const user2 = {
-    name: "Charlie",
-    quote: "Arf! Arf! Woof! Woof!"
+    username: "Charlie",
+    password: "Arf! Arf! Woof! Woof!",
+    email: "charlie@charlie.com"
 }; 
-
+const user3 = {}
 app.use(cookieParser());
  
 const isAuthenticated = (req, res, next) => {
@@ -60,7 +62,7 @@ app.get("/forum", isAuthenticated, (req,res) => {
 app.post("/login", express.urlencoded({ extended: true }), (req, res) => {
     const { email, password } = req.body;
  
-    // Check if the provided credentials are valid
+    // Check if the provided credentials are valid (for MCO2)
     if (email === "admin@gmail.com" && password === "admin") {
         // Store user data in the session
         req.session.user = user1;
@@ -75,19 +77,35 @@ app.post("/login", express.urlencoded({ extended: true }), (req, res) => {
  
         res.redirect("/profile");
     }
+    else if (user3 !== null && email === user3.username && password === user3.password) {
+        // Store user data in the session
+        req.session.user = user3;
+        res.cookie("sessionId", req.sessionID);
+ 
+        res.redirect("/profile");
+    }
      else {
-        res.status(401).send('Invalid credentials');
-        res.redirect("/login");
+        res.send("Error User Not Found")
     }
 });
- 
+app.post("/register", express.urlencoded({ extended: true }), (req, res) => {
+    const {username, email, password } = req.body;
+    // Temporary Storage of Users for MCO2 (will use mongodb in the future)
+    user3.username = username;
+    user3.email = email;
+    user3.password = password;
+    res.redirect("/login");
+});
 app.get("/profile", isAuthenticated, (req, res) => {
     // Retrieve user data from the session
     const userData = req.session.user;
     console.log(userData);
     res.render('profile',{userData});
 });
- 
+app.get("/register", (req, res) =>{
+    res.sendFile(__dirname + "/register.html");
+});
+
 app.get("/logout", (req, res) => {
     // Destroy the session and redirect to the login page
     req.session.destroy(() => {

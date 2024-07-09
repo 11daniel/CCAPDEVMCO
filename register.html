@@ -15,13 +15,13 @@
     <nav id="navbar" class="nav">
         <ul class="nav-list">
             <li>
-                <a href="index.html" class="nava">Home</a>
+                <a href="/" class="nava">Home</a>
             </li>
             <li>
-                <a href="forum.html" class="nava">Forum</a>
+                <a href="/forum" class="nava">Forum</a>
             </li>
             <li>
-                <a href="register.html" class="nava">
+                <a href="/register" class="nava">
                     <i style="font-size:24px" class="fa">&#xf2bd;</i>
                 </a>
             </li>
@@ -34,14 +34,14 @@
         </div>
         <h1>Sign Up</h1>
         <p class="description">Join our programming community and start improving your coding skills!</p>
-        <form id="register-form">
+        <form id="register-form" action="/register" method="post">
             <input type="text" id="username" placeholder="Username" required>
             <input type="email" id="email" placeholder="Email" required>
             <input type="password" id="password" placeholder="Password" required>
             <input type="password" id="confirm-password" placeholder="Confirm Password" required>
             <button type="submit" class="register-button">Sign Up</button>
         </form>
-        <a href="login.html" class="login-link">Already have an account?</a>
+        <a href="/login" class="login-link">Already have an account?</a>
         <p class="privacy">By signing up, you agree to our <a href="#">Privacy Policy</a> and <a href="#">Terms of
                 Service</a>.</p>
     </div>

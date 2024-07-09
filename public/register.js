@@ -26,5 +26,4 @@ document.getElementById('register-form').addEventListener('submit', function (ev
     localStorage.setItem('users', JSON.stringify(users));
 
     alert('Registration successful!');
-    window.location.href = 'login.html';
 });
