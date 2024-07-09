@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
         res.render('homepage',{userData});
     }
     else{
-        res.sendFile(__dirname + "/login.html");
+        res.sendFile(__dirname + "/index.html");
     }
 });
  
@@ -52,19 +52,23 @@ app.get("/login", (req, res) => {
     res.sendFile(__dirname + "/login.html");
     }
 });
- 
+
+app.get("/forum", isAuthenticated, (req,res) => {
+    res.sendFile(__dirname + "/forum.html");
+});
+
 app.post("/login", express.urlencoded({ extended: true }), (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
  
     // Check if the provided credentials are valid
-    if (username === "admin" && password === "admin") {
+    if (email === "admin@gmail.com" && password === "admin") {
         // Store user data in the session
         req.session.user = user1;
         res.cookie("sessionId", req.sessionID);
  
         res.redirect("/profile");
     }
-    else if (username === "charlie" && password === "charlie") {
+    else if (email === "charlie@gmail.com" && password === "charlie") {
         // Store user data in the session
         req.session.user = user2;
         res.cookie("sessionId", req.sessionID);
@@ -72,7 +76,8 @@ app.post("/login", express.urlencoded({ extended: true }), (req, res) => {
         res.redirect("/profile");
     }
      else {
-        res.send("Invalid credentials. <a href='/login'>Please try again.");
+        res.status(401).send('Invalid credentials');
+        res.redirect("/login");
     }
 });
  
