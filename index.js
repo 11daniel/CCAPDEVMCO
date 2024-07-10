@@ -6,6 +6,8 @@ const app = express();
 const hbs = require('hbs');
 app.set('view engine','hbs');
 
+app.use(express.static(__dirname + '/public'));
+
 app.use(
     session({
         secret: "secret-key",
