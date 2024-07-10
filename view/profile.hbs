@@ -1,57 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Peaky Coders Forum</title>
-  <link rel="stylesheet" href="forum.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="settings.css">
+    <script src="settings.js" defer></script>
+    <title>Settings</title>
 </head>
-
 <body>
-  <header>
-    <h1>Welcome to the Peaky Coders Forum</h1>
-  </header>
-  <nav id="navbar" class="nav">
-    <ul class="nav-list">
-      <li>
-        <a href="index.html" class="nava">Home</a>
-      </li>
-      <li>
-        <a href="forum.html" class="nava">Forum</a>
-      </li>
-      <li>
-        <a href="register.html" class="nava">
-          <i class="fas fa-user"></i>
-        </a>
-      </li>
-    </ul>
-  </nav>
-  <main>
-
-    <section class="posts">
-      <h2>Recent Posts</h2>
-      <ul id="post-list">
-        <!-- Posts will be inserted here by JS -->
-      </ul>
-    </section>
-
-    <section class="new-post">
-      <h2>Create New Post</h2>
-      <form id="new-post-form">
-        <input type="text" id="new-post-title" placeholder="Post Title" required>
-        <textarea id="new-post-content" placeholder="Post Content" required></textarea>
-        <button type="submit">Submit</button>
-      </form>
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; 2024 Peaky Coders. All rights reserved.</p>
-  </footer>
-  <script src="userpost.js"></script>
+    <div class="container">
+        <div class="sidebar">
+            <ul>
+                <li><a href="#" id="profileBtn" class="active"><i class="fas fa-user-circle"></i> Profile</a></li>
+                <li><a href="#" id="postsBtn"><i class="fas fa-thumbtack"></i> Posts</a></li>
+                <li><a href="#" id="commentsBtn"><i class="fas fa-comments"></i> Comments</a></li>
+                <li><a href="#"><i class="fas fa-eye"></i> Public View</a></li>
+                <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            </ul>
+            <ul>
+                <li><a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        <div class="content">
+            <div id="profileContent" class="content-section active">
+                <h1>Profile</h1>
+                <div class="profile-details">
+                    <div class="profile-pic">
+                        <img src="josh.jpg" alt="Profile Picture">
+                        <button>Change Photo</button>
+                    </div>
+                    <div class="bio">
+                        <label>Bio</label>
+                        <p>Web developer and technology enthusiast.</p>
+                        <button>Edit</button>
+                    </div>
+                    <div class="info">
+                        <label>Username</label>
+                        <p>Joshy</p>
+                        <button>Edit</button>
+                    </div>
+                    <div class="info">
+                        <label>Email</label>
+                        <p>joshy@example.com</p>
+                    </div>
+                    <div class="info">
+                        <button>Change Password</button>
+                    </div>
+                </div>
+            </div>
+            <div id="postsContent" class="content-section">
+                <h1>Posts</h1>
+                <p>You have 10 posts</p>
+                <div class="posts-list">
+                    <!-- Example post -->
+                    <div class="post">
+                        <span class="post-date">June 1, 2023</span>
+                        <h2>Help Needed with CSS</h2>
+                        <p>Whats the best design for this</p>
+                    </div>
+                    <!-- Add more posts as needed -->
+                </div>
+            </div>
+            <div id="commentsContent" class="content-section">
+                <h1>Comments</h1>
+                <p>You have made 5 comments</p>
+                <div class="comments-list">
+                    <!-- Example comment -->
+                    <div class="comment">
+                        <span class="comment-date">June 10, 2023</span>
+                        <p>I can't understand anything</p>
+                    </div>
+                    <!-- Add more comments as needed -->
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
-
 </html>
