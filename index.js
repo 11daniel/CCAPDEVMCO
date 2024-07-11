@@ -1,14 +1,27 @@
 const express = require("express");
 const session = require("express-session");
+const fileUpload = require('express-fileupload')
 const cookieParser = require("cookie-parser");
 const path = require('path');
+const mongoose = require('mongoose')
+const dbURL = "mongodb+srv://admin:foiTTXlNEKLaJBwL@ccapdev.ifalvu3.mongodb.net/?retryWrites=true&w=majority&appName=ccapdev"
 
+mongoose.connect(dbURL).then(()=>{
+    console.info('Connected to App Demo Data Base');
+})
+.catch((e) => {
+    console.log('Error Connecting to App Demo Data Base');
+});
+const Post = require("./models/POST");
+const User = require("./models/USER");
 const app = express();
+app.use(express.urlencoded( {extended: true}));
 const hbs = require('hbs');
 app.set('view engine','hbs');
 
 //app.use(express.static(__dirname + '/public'));
 app.use('/public', express.static(path.join(__dirname + '/public')));
+app.use(express.json()) 
 
 app.use(
     session({
@@ -64,40 +77,18 @@ app.get("/forum", isAuthenticated, (req,res) => {
 });
 
 app.post("/login", express.urlencoded({ extended: true }), (req, res) => {
-    const { email, password } = req.body;
- 
-    // Check if the provided credentials are valid (for MCO2)
-    if (email === "admin@gmail.com" && password === "admin") {
-        // Store user data in the session
-        req.session.user = user1;
-        res.cookie("sessionId", req.sessionID);
- 
-        res.redirect("/profile");
-    }
-    else if (email === "charlie@gmail.com" && password === "charlie") {
-        // Store user data in the session
-        req.session.user = user2;
-        res.cookie("sessionId", req.sessionID);
- 
-        res.redirect("/profile");
-    }
-    else if (user3 !== null && email === user3.username && password === user3.password) {
-        // Store user data in the session
-        req.session.user = user3;
-        res.cookie("sessionId", req.sessionID);
- 
-        res.redirect("/profile");
-    }
-     else {
-        res.send("Error User Not Found")
-    }
+    const user = req.body;
+    User.findOne(user, function(err,user){
+        if (err){console.log ("Error!")}
+        else {
+            req.session.user = user;
+            res.cookie("sessionId", req.sessionID);
+            res.redirect("/profile");
+        }
+    });
 });
 app.post("/register", express.urlencoded({ extended: true }), (req, res) => {
-    const {username, email, password } = req.body;
-    // Temporary Storage of Users for MCO2 (will use mongodb in the future)
-    user3.username = username;
-    user3.email = email;
-    user3.password = password;
+    User.create({...req.body,image:null});
     res.redirect("/login");
 });
 app.get("/profile", isAuthenticated, (req, res) => {

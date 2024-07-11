@@ -2,9 +2,11 @@
   "dependencies": {
     "cookie-parser": "^1.4.6",
     "express": "^4.19.2",
+    "express-fileupload": "^1.5.0",
     "express-session": "^1.18.0",
     "hbs": "^4.2.0",
-    "mongodb": "^6.8.0"
+    "mongodb": "^6.8.0",
+    "mongoose": "^8.5.0"
   },
   "name": "ccapdevmco",
   "version": "1.0.0",
