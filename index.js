@@ -1,12 +1,14 @@
 const express = require("express");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
- 
+const path = require('path');
+
 const app = express();
 const hbs = require('hbs');
 app.set('view engine','hbs');
 
-app.use(express.static(__dirname + '/public'));
+//app.use(express.static(__dirname + '/public'));
+app.use('/public', express.static(path.join(__dirname + '/public')));
 
 app.use(
     session({
