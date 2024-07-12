@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/public/css/settings.css">
+  <script src="/public/js/settings.js" defer></script>
+  <title>Settings</title>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <ul>
+        <li><a href="#" id="profileBtn" class="active"><i class="fas fa-user-circle"></i> Profile</a></li>
+        <li><a href="#" id="postsBtn"><i class="fas fa-thumbtack"></i> Posts</a></li>
+        <li><a href="#" id="commentsBtn"><i class="fas fa-comments"></i> Comments</a></li>
+        <li><a href="#"><i class="fas fa-eye"></i> Public View</a></li>
+        <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+      </ul>
+      <ul>
+        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </div>
+    <div class="content">
+      <div id="profileContent" class="content-section active">
+        <h1>Profile</h1>
+        <div class="profile-details">
+          <div class="profile-pic">
+            <img src="{{user.profilePicture}}" alt="Profile Picture">
+            <button>Change Photo</button>
+          </div>
+          <div class="bio">
+            <label>Bio</label>
+            <p>{{user.bio}}</p>
+            <button>Edit</button>
+          </div>
+          <div class="info">
+            <label>Username</label>
+            <p>{{user.username}}</p>
+            <button>Edit</button>
+          </div>
+          <div class="info">
+            <label>Email</label>
+            <p>{{user.email}}</p>
+          </div>
+          <div class="info">
+            <button>Change Password</button>
+          </div>
+        </div>
+      </div>
+      <div id="postsContent" class="content-section">
+        <h1>Posts</h1>
+        <p>You have {{user.postsCount}} posts</p>
+        <div class="posts-list">
+          {{#each user.posts}}
+            <div class="post">
+              <span class="post-date">{{this.date}}</span>
+              <h2>{{this.title}}</h2>
+              <p>{{this.content}}</p>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+      <div id="commentsContent" class="content-section">
+        <h1>Comments</h1>
+        <p>You have made {{user.commentsCount}} comments</p>
+        <div class="comments-list">
+          {{#each user.comments}}
+            <div class="comment">
+              <span class="comment-date">{{this.date}}</span>
+              <p>{{this.content}}</p>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

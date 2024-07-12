@@ -1,0 +1,42 @@
+I organized the files:
+
+CCAPDEV FOLDER:
+- public folder
+	- css folder
+		- CSS FILES
+	- js folder
+		- JS FILES
+	- media folder
+		- IMAGES
+- views folder
+	- HBS FILES
+- HTML FILES
+- JSON FILES
+- index.js
+
+
+NOTES:
+- Registration works
+- Login works but not for newly registered users. Only for sample users inside index.js
+- Profile page works
+- In PROFILE PAGE, the logo at the top left should direct you back to home page, but somehow it says it cannot get
+  index.html
+- Settings/Profile page editing works but functionalities like change photo, edit bio, edit username, 
+  change password do not work
+- Home button INSIDE Settings page does not work (I made a temporary page for it). The error says it cannot find
+  HOMEPAGE
+- Logout button works
+
+
+Run procedure:
+cmd the project directory
+
+type
+
+npm init -y
+then
+npm install hbs mongoose express express-session express-fileupload cookie-parser mongodb
+then
+node index.js
+
+open browser, enter localhost:3000 sa search bar

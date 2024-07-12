@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peaky Coders Sign Up</title>
+    <link rel="stylesheet" href="/public/css/register.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&family=Roboto:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+
+<body>
+    <nav id="navbar" class="nav">
+        <ul class="nav-list">
+            <li>
+                <a href="/" class="nava">Home</a>
+            </li>
+            <li>
+                <a href="/forum" class="nava">Forum</a>
+            </li>
+            <li>
+                <a href="/register" class="nava">
+                    <i style="font-size:24px" class="fa">&#xf2bd;</i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="image-container">
+            <img src="https://img.freepik.com/free-vector/programming-concept-illustration_114360-1351.jpg?w=740&t=st=1717574227~exp=1717574827~hmac=b00e856da246f2d521835df6cb5109a6e47b21f5a68770a1d76b4195f75d5b50"
+                alt="Programming Illustration" class="background-image">
+        </div>
+        <h1>Sign Up</h1>
+        <p class="description">Join our programming community and start improving your coding skills!</p>
+        <form id="register-form" action="/register" method="post">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+            <button type="submit" class="register-button">Sign Up</button>
+        </form>
+        <a href="/login" class="login-link">Already have an account?</a>
+        <p class="privacy">By signing up, you agree to our <a href="#">Privacy Policy</a> and <a href="#">Terms of
+                Service</a>.</p>
+    </div>
+    <script src="/public/js/register.js"></script>
+</body>
+
+</html>

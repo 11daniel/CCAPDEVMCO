@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/public/css/profile.css">
+  <title>User Profile</title>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-logo"><img src="public/css/logo.png" alt="Logo" class="logo"></a>
+    <div class="navbar-links">
+      <a href="/profile" class="navbar-user">
+        <img src="{{user.profilePicture}}" alt="User Profile">
+        <span>{{user.name}}</span>
+      </a>
+      <a href="#"><i class="bi bi-bell"></i></a>
+      <a href="/settings"><i class="bi bi-gear"></i></a> <!-- Updated this link -->
+    </div>
+  </nav>
+
+  <!-- Profile Section -->
+  <div class="profile-container">
+    <div class="profile-sidebar">
+      <img src="{{user.profilePicture}}" alt="User Profile" class="profile-pic">
+      <h2>{{user.name}}</h2>
+      <p>{{user.bio}}</p>
+      <p>Joined: {{user.joinDate}}</p>
+    </div>
+    
+    <div class="profile-content">
+      <h3>Recent Posts</h3>
+      {{#each user.posts}}
+        <div class="post">
+          <div class="post-header">
+            <span><i class="bi bi-calendar"></i> {{this.date}}</span>
+            <h4>{{this.title}}</h4>
+          </div>
+          <div class="post-body">
+            <p>{{this.content}}</p>
+          </div>
+          <div class="post-footer">
+            <a href="#"><i class="bi bi-hand-thumbs-up"></i> {{this.likes}}</a>
+            <a href="#"><i class="bi bi-hand-thumbs-down"></i> {{this.dislikes}}</a>
+            <a href="#"><i class="bi bi-chat"></i> {{this.comments}} Comments</a>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+</body>
+</html>
