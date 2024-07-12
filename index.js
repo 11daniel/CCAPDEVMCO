@@ -78,7 +78,7 @@ app.get("/forum", isAuthenticated, (req,res) => {
 
 app.post("/login", express.urlencoded({ extended: true }), (req, res) => {
     const user = req.body;
-    User.findOne(user, function(err,user){
+    const check = User.findOne(user, function(err,user){
         if (err){console.log ("Error!")}
         else {
             req.session.user = user;
@@ -88,6 +88,7 @@ app.post("/login", express.urlencoded({ extended: true }), (req, res) => {
     });
 });
 app.post("/register", express.urlencoded({ extended: true }), (req, res) => {
+    console.log(req.body);
     User.create({...req.body,image:null});
     res.redirect("/login");
 });
