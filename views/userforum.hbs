@@ -14,37 +14,70 @@
   </header>
   <nav id="navbar" class="nav">
     <ul class="nav-list">
-      <li><a href="index.html" class="nava">Home</a></li>
-      <li><a href="/views/userforum.hbs" class="nava">Forum</a></li>
-      <li><a href="register.html" class="nava"><i class="fas fa-user"></i></a></li>
+      <li><a href="/" class="nava">Home</a></li>
+      <li><a href="/userforum" class="nava">Forum</a></li>
+      <li><a href="/register" class="nava"><i class="fas fa-user"></i></a></li>
+      <li><a href="/profile" class="nava">Profile</a></li>
     </ul>
   </nav>
   <main>
-    <section class="posts">
-      <h2>Recent Posts</h2>
-      <ul id="post-list">
-        {{#each posts}}
-          <li>
-            <h3>{{this.title}}</h3>
-            <p>{{this.content}}</p>
-          </li>
-        {{/each}}
-      </ul>
-    </section>
-
     <section class="new-post">
       <h2>Create New Post</h2>
       <form id="new-post-form">
         <input type="text" id="new-post-title" placeholder="Post Title" required>
         <textarea id="new-post-content" placeholder="Post Content" required></textarea>
-        <button type="submit">Submit</button>
+        <button type="submit" class="new-post-btn">Submit</button>
       </form>
+    </section>
+
+    <section class="filter-buttons">
+      <button id="latest-posts" class="filter-btn">Latest Posts</button>
+      <button id="popular-posts" class="filter-btn">Popular Posts</button>
+    </section>
+
+    <section class="posts">
+      <h2>Recent Posts</h2>
+      <ul id="post-list">
+        {{#each posts}}
+          <li class="post" data-id="{{this._id}}">
+            <div class="user">
+              <img src="/path/to/avatar.jpg" alt="User Avatar">
+              <span>{{this.user}}</span>
+            </div>
+            <div class="content">
+              <h3><a href="#">{{this.title}}</a></h3>
+              <p>Posted by {{this.user}} | {{this.createdAt}}</p>
+              <p>{{this.content}}</p>
+              <div class="voting">
+                <button class="upvote-button">Upvote</button>
+                <span class="upvote-counter">{{this.upvotes}}</span>
+                <button class="downvote-button">Downvote</button>
+                <span class="downvote-counter">{{this.downvotes}}</span>
+              </div>
+              <div class="comment-section">
+                <ul class="comment-list">
+                  {{#each this.comments}}
+                    <li class="comment">{{this}}</li>
+                  {{/each}}
+                </ul>
+                <form class="comment-form">
+                  <textarea name="commentText" placeholder="Add a comment..."></textarea>
+                  <button type="submit">Submit</button>
+                </form>
+              </div>
+            </div>
+          </li>
+        {{/each}}
+      </ul>
     </section>
   </main>
 
   <footer>
     <p>&copy; 2024 Peaky Coders. All rights reserved.</p>
   </footer>
-  <script src="userpost.js"></script>
+
+  <button id="back-to-top" title="Go to top">↑</button>
+
+  <script src="/public/js/userpost.js"></script>
 </body>
 </html>

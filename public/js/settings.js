@@ -1,38 +1,88 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const profileBtn = document.getElementById('profileBtn');
-    const postsBtn = document.getElementById('postsBtn');
-    const commentsBtn = document.getElementById('commentsBtn');
-    
-    const profileContent = document.getElementById('profileContent');
-    const postsContent = document.getElementById('postsContent');
-    const commentsContent = document.getElementById('commentsContent');
+    const profilePicForm = document.getElementById('profilePicForm');
+    const bioForm = document.getElementById('bioForm');
+    const usernameForm = document.getElementById('usernameForm');
+    const changePhotoBtn = document.getElementById('changePhotoBtn');
+    const profilePictureInput = document.getElementById('profilePictureInput');
+    const confirmChangesBtn = document.getElementById('confirmChangesBtn');
 
-    function showContent(content) {
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.classList.remove('active');
-        });
-        content.classList.add('active');
-    }
-
-    function activateButton(button) {
-        document.querySelectorAll('.sidebar a').forEach(link => {
-            link.classList.remove('active');
-        });
-        button.classList.add('active');
-    }
-
-    profileBtn.addEventListener('click', () => {
-        showContent(profileContent);
-        activateButton(profileBtn);
+    changePhotoBtn.addEventListener('click', () => {
+        profilePictureInput.click();
     });
 
-    postsBtn.addEventListener('click', () => {
-        showContent(postsContent);
-        activateButton(postsBtn);
+    profilePictureInput.addEventListener('change', () => {
+        if (profilePictureInput.files.length > 0) {
+            confirmChangesBtn.style.display = 'block';
+        }
     });
 
-    commentsBtn.addEventListener('click', () => {
-        showContent(commentsContent);
-        activateButton(commentsBtn);
+    profilePicForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(profilePicForm);
+        fetch('/updateProfilePicture', {
+            method: 'POST',
+            body: formData,
+        }).then(response => response.json()).then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Failed to update profile picture');
+            }
+        });
+    });
+
+    bioForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        fetch('/updateBio', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ bio: bioForm.bio.value }),
+        }).then(response => response.json()).then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Failed to update bio');
+            }
+        });
+    });
+
+    usernameForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        fetch('/updateUsername', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username: usernameForm.username.value }),
+        }).then(response => response.json()).then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Failed to update username');
+            }
+        });
+    });
+
+    confirmChangesBtn.addEventListener('click', () => {
+        const formData = new FormData();
+        if (profilePictureInput.files.length > 0) {
+            formData.append('profilePicture', profilePictureInput.files[0]);
+        }
+
+        formData.append('bio', bioForm.bio.value);
+        formData.append('username', usernameForm.username.value);
+
+        fetch('/updateProfile', {
+            method: 'POST',
+            body: formData,
+        }).then(response => response.json()).then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Failed to update profile');
+            }
+        });
     });
 });

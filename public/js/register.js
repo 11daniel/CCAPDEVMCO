@@ -1,4 +1,15 @@
-document.getElementById('register-form').addEventListener('submit', function (event) {
+document.getElementById('toggle-password').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+    } else {
+        passwordInput.type = 'password';
+        this.innerHTML = '<i class="fas fa-eye"></i>';
+    }
+});
+
+document.getElementById('register-form').addEventListener('submit', function(event) {
     event.preventDefault();
     const username = document.getElementById('username').value;
     const email = document.getElementById('email').value;
@@ -10,20 +21,27 @@ document.getElementById('register-form').addEventListener('submit', function (ev
         return;
     }
 
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-
-    if (users.some(user => user.email === email)) {
-        alert('Email already registered.');
-        return;
-    }
-
-    if (users.some(user => user.username === username)) {
-        alert('Username already taken.');
-        return;
-    }
-
-    users.push({ username, email, password });
-    localStorage.setItem('users', JSON.stringify(users));
-
-    alert('Registration successful!');
+    fetch('/check-username-email', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, email })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.exists) {
+            if (data.exists.username) {
+                alert('Username already taken.');
+            }
+            if (data.exists.email) {
+                alert('Email already registered.');
+            }
+        } else {
+            document.getElementById('register-form').submit();
+        }
+    })
+    .catch(error => {
+        console.error('Error checking username and email:', error);
+    });
 });

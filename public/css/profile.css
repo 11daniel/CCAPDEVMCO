@@ -13,29 +13,61 @@ body {
     padding: 10px 20px;
 }
 
-.navbar-logo img {
-    height: 40px;
-    background-color: gray;
+/* Navbar logo */
+.navbar-logo {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
 }
 
+.navbar-logo:hover {
+    color: #ccc;
+}
+
+/* Navbar links container */
 .navbar-links {
     display: flex;
     align-items: center;
 }
 
-.navbar-links a {
-    color: white;
-    text-decoration: none;
-    margin-left: 20px;
+/* User profile link */
+.navbar-user {
     display: flex;
     align-items: center;
+    margin-right: 20px;
+    color: #fff;
+    text-decoration: none;
 }
 
-.navbar-links a img {
+.navbar-user img {
+    width: 30px;
     height: 30px;
     border-radius: 50%;
     margin-right: 10px;
 }
+
+.navbar-user span {
+    font-size: 1em;
+    color: #fff;
+}
+
+.navbar-user:hover span {
+    color: #ccc;
+}
+
+
+.navbar-links a {
+    margin-left: 15px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2em;
+}
+
+.navbar-links a:hover {
+    color: #ccc;
+}
+
 
 .profile-container {
     display: flex;
@@ -100,4 +132,19 @@ body {
 
 .post-footer a:hover {
     text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar-links {
+        margin-top: 10px;
+    }
+
+    .navbar-user {
+        margin-right: 10px;
+    }
 }

@@ -27,33 +27,37 @@
         <h1>Profile</h1>
         <div class="profile-details">
           <div class="profile-pic">
-            <img src="{{user.profilePicture}}" alt="Profile Picture">
-            <button>Change Photo</button>
+            <img src="{{userData.profilePicture}}" alt="Profile Picture">
+            <input type="file" id="profilePictureInput" name="profilePicture" style="display: none;">
+            <button id="changePhotoBtn">Change Photo</button>
           </div>
           <div class="bio">
             <label>Bio</label>
-            <p>{{user.bio}}</p>
-            <button>Edit</button>
+            <form id="bioForm" action="/updateBio" method="POST">
+              <textarea name="bio">{{userData.bio}}</textarea>
+            </form>
           </div>
           <div class="info">
             <label>Username</label>
-            <p>{{user.username}}</p>
-            <button>Edit</button>
+            <form id="usernameForm" action="/updateUsername" method="POST">
+              <input type="text" name="username" value="{{userData.username}}">
+            </form>
           </div>
           <div class="info">
             <label>Email</label>
-            <p>{{user.email}}</p>
+            <p>{{userData.email}}</p>
           </div>
           <div class="info">
-            <button>Change Password</button>
+            <button id="changePasswordBtn">Change Password</button>
           </div>
+          <button id="confirmChangesBtn">Confirm Changes</button>
         </div>
       </div>
       <div id="postsContent" class="content-section">
         <h1>Posts</h1>
-        <p>You have {{user.postsCount}} posts</p>
+        <p>You have {{userData.postsCount}} posts</p>
         <div class="posts-list">
-          {{#each user.posts}}
+          {{#each userData.posts}}
             <div class="post">
               <span class="post-date">{{this.date}}</span>
               <h2>{{this.title}}</h2>
@@ -64,9 +68,9 @@
       </div>
       <div id="commentsContent" class="content-section">
         <h1>Comments</h1>
-        <p>You have made {{user.commentsCount}} comments</p>
+        <p>You have made {{userData.commentsCount}} comments</p>
         <div class="comments-list">
-          {{#each user.comments}}
+          {{#each userData.comments}}
             <div class="comment">
               <span class="comment-date">{{this.date}}</span>
               <p>{{this.content}}</p>
