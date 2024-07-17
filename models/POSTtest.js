@@ -9,7 +9,7 @@ const PostSchema = new mongoose.Schema({
     comments: [String],
     upvotes: { type: Number, default: 0 },
     downvotes: { type: Number, default: 0 },
-    voted: String
+    voted: []
 });
 
 const Post = mongoose.model('Post', PostSchema);

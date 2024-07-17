@@ -102,7 +102,7 @@ app.post("/register", express.urlencoded({ extended: true }), async (req, res) =
             return res.status(400).send('Email or username already registered');
         }
 
-        await User.create({ username: req.body.username, email: req.body.email, password: req.body.password });
+        await User.create({ username: req.body.username, email: req.body.email, password: req.body.password,info: "no Content",image:"null" });
         res.redirect("/login");
     } catch (err) {
         console.log("Error!", err);
@@ -133,6 +133,11 @@ app.post('/check-username-email', async (req, res) => {
 app.get("/profile", isAuthenticated, (req, res) => {
     const userData = req.session.user;
     res.render('profile', { userData });
+});
+
+app.get("/settings", isAuthenticated, (req, res) => {
+    const userData = req.session.user;
+    res.render('settings', { userData });
 });
 
 app.get("/register", (req, res) => {
