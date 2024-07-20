@@ -133,14 +133,13 @@ app.post('/check-username-email', async (req, res) => {
 
 app.get("/userforum", isAuthenticated, async (req, res) => {
     try {
-        const posts = await Post.find().sort({ createdAt: -1 }); // Fetch posts sorted by creation date
+        const posts = await Post.find().sort({ createdAt: -1 });
         res.render('userforum', { posts, userData: req.session.user });
     } catch (err) {
         console.log("Error fetching posts!", err);
         res.redirect("/");
     }
 });
-
 
 app.get("/profile", isAuthenticated, (req, res) => {
     const userData = req.session.user;
@@ -168,7 +167,6 @@ app.get('/api/posts', isAuthenticated, async (req, res) => {
     }
 });
 
-
 app.post("/createPost", isAuthenticated, async (req, res) => {
     const { title, content } = req.body;
     try {
@@ -183,13 +181,12 @@ app.post("/createPost", isAuthenticated, async (req, res) => {
             createdAt: new Date()
         });
         await newPost.save();
-        res.json(newPost); // Return the new post
+        res.json(newPost);
     } catch (err) {
         console.log("Error creating post!", err);
         res.status(500).json({ error: "Error creating post" });
     }
 });
-
 
 app.post('/updateProfile', isAuthenticated, async (req, res) => {
     try {
@@ -218,6 +215,73 @@ app.post('/updateProfile', isAuthenticated, async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false });
+    }
+});
+
+app.post('/vote', isAuthenticated, async (req, res) => {
+    const { postId, voteType } = req.body;
+    const userId = req.session.user._id.toString();
+
+    try {
+        const post = await Post.findById(postId);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const currentVote = post.voters.get(userId);
+
+        if (currentVote === voteType) {
+            if (voteType === 'upvote') {
+                post.upvotes--;
+            } else {
+                post.downvotes--;
+            }
+            post.voters.delete(userId);
+        } else {
+            if (currentVote === 'upvote') {
+                post.upvotes--;
+            } else if (currentVote === 'downvote') {
+                post.downvotes--;
+            }
+
+            if (voteType === 'upvote') {
+                post.upvotes++;
+            } else {
+                post.downvotes++;
+            }
+            post.voters.set(userId, voteType);
+        }
+
+        await post.save();
+        res.json({ success: true, post });
+    } catch (err) {
+        console.log('Error voting on post!', err);
+        res.status(500).json({ error: 'Error voting on post' });
+    }
+});
+
+app.post('/api/posts/:postId/comments', isAuthenticated, async (req, res) => {
+    const { postId } = req.params;
+    const { commentText } = req.body;
+    const userId = req.session.user._id;
+    const username = req.session.user.username;
+
+    try {
+        const post = await Post.findById(postId);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const newComment = { user: username, text: commentText, createdAt: new Date() };
+        post.comments.push(newComment);
+        await post.save();
+
+        res.json({ success: true, post });
+    } catch (err) {
+        console.log('Error adding comment!', err);
+        res.status(500).json({ error: 'Error adding comment' });
     }
 });
 
