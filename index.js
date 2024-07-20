@@ -4,6 +4,9 @@ const fileUpload = require('express-fileupload');
 const cookieParser = require("cookie-parser");
 const path = require('path');
 const mongoose = require('mongoose');
+const hbs = require('hbs');
+
+
 const dbURL = "mongodb+srv://admin:foiTTXlNEKLaJBwL@ccapdev.ifalvu3.mongodb.net/?retryWrites=true&w=majority&appName=ccapdev";
 
 mongoose.connect(dbURL).then(() => {
@@ -14,9 +17,10 @@ mongoose.connect(dbURL).then(() => {
 
 const Post = require("./models/POST");
 const User = require("./models/USER");
+
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-const hbs = require('hbs');
+
 app.set('view engine', 'hbs');
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
@@ -32,6 +36,10 @@ app.use(
 );
 
 app.use(cookieParser());
+
+hbs.registerHelper('eq', function(a, b) {
+    return a === b;
+});
 
 const isAuthenticated = (req, res, next) => {
     if (req.session.user) {
@@ -57,12 +65,16 @@ app.get("/forum", isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, "forum.html"));
 });
 
-app.get("/userforum", isAuthenticated, (req, res) => {
-    const userData = req.session.user;
-    res.render('userforum', { userData });
+app.get('/userforum', isAuthenticated, async (req, res) => {
+    try {
+        const posts = await Post.find().lean();
+        res.render('userforum', { userData: req.session.user, posts });
+    } catch (err) {
+        console.log('Error fetching posts:', err);
+        res.status(500).send('Error fetching posts');
+    }
 });
 
-// Route to settings.hbs
 app.get("/settings", isAuthenticated, (req, res) => {
     const userData = req.session.user;
     res.render('settings', { userData });
@@ -128,16 +140,6 @@ app.post('/check-username-email', async (req, res) => {
         });
     } else {
         res.json({ exists: false });
-    }
-});
-
-app.get("/userforum", isAuthenticated, async (req, res) => {
-    try {
-        const posts = await Post.find().sort({ createdAt: -1 });
-        res.render('userforum', { posts, userData: req.session.user });
-    } catch (err) {
-        console.log("Error fetching posts!", err);
-        res.redirect("/");
     }
 });
 
@@ -285,7 +287,6 @@ app.post('/api/posts/:postId/comments', isAuthenticated, async (req, res) => {
     }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log('Listening to port 3000');
+app.listen(3000, () => {
+    console.log("Server started on port 3000");
 });
