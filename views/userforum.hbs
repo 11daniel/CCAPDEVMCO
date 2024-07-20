@@ -45,6 +45,9 @@
           <div class="user">
             <img src="/path/to/avatar.jpg" alt="User Avatar">
             <span>{{this.user}}</span>
+            {{#if (eq this.user ../userData.username)}}
+            <button class="delete-post-button">Delete Post</button>
+            {{/if}}
           </div>
           <div class="content">
             <h3><a href="#">{{this.title}}</a></h3>
@@ -59,7 +62,12 @@
             <div class="comment-section">
               <ul class="comment-list">
                 {{#each this.comments}}
-                <li class="comment"><strong>{{this.user}}</strong>: {{this.text}}</li>
+                <li class="comment" data-comment-id="{{this._id}}">
+                  <strong>{{this.user}}</strong>: {{this.text}}
+                  {{#if (eq this.user ../userData.username)}}
+                  <button class="delete-comment-button">Delete Comment</button>
+                  {{/if}}
+                </li>
                 {{/each}}
               </ul>
               <form class="comment-form">
@@ -72,7 +80,6 @@
         {{/each}}
       </ul>
     </section>
-
 
   </main>
 
