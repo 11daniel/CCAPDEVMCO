@@ -105,6 +105,46 @@ $(document).ready(function () {
         });
     }
 
+    function handleDeletePost(event) {
+        event.preventDefault();
+        const postId = $(this).closest('.post').data('id');
+
+        $.ajax({
+            type: 'DELETE',
+            url: `/api/posts/${postId}`,
+            success: function(response) {
+                if (response.success) {
+                    $(`li[data-id='${postId}']`).remove();
+                }
+            },
+            error: function(err) {
+                console.log('Error deleting post:', err);
+            }
+        });
+    }
+
+    function handleDeleteComment(event) {
+        event.preventDefault();
+        const postId = $(this).closest('.post').data('id');
+        const commentId = $(this).closest('.comment').data('comment-id');
+
+        $.ajax({
+            type: 'DELETE',
+            url: `/api/posts/${postId}/comments/${commentId}`,
+            success: function(response) {
+                if (response.success) {
+                    $(`li[data-comment-id='${commentId}']`).remove();
+                }
+            },
+            error: function(err) {
+                console.log('Error deleting comment:', err);
+            }
+        });
+    }
+
+    $('#post-list').on('click', '.delete-post-button', handleDeletePost);
+    $('#post-list').on('click', '.delete-comment-button', handleDeleteComment);
+
     $('#post-list').on('click', '.upvote-button', function(event) {
         handleVote.call(this, event, 'upvote');
     });
