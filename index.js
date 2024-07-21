@@ -50,8 +50,6 @@ hbs.registerHelper('formatDate', function(date) {
     return isNaN(parsedDate) ? 'Invalid Date' : parsedDate.toLocaleDateString();
 });
 
-
-
 const isAuthenticated = (req, res, next) => {
     if (req.session.user) {
         next();
@@ -173,7 +171,10 @@ app.get('/profile', isAuthenticated, async (req, res) => {
 
         const userData = {
             ...user,
-            posts
+            posts: posts.map(post => ({
+                ...post,
+                createdAt: new Date(post.createdAt)
+            }))
         };
 
         res.render('profile', { userData });
@@ -182,6 +183,7 @@ app.get('/profile', isAuthenticated, async (req, res) => {
         res.status(500).send('Error fetching user profile');
     }
 });
+
 
 
 app.get("/register", (req, res) => {
