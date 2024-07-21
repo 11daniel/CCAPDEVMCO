@@ -6,7 +6,6 @@ const path = require('path');
 const mongoose = require('mongoose');
 const hbs = require('hbs');
 
-
 const dbURL = "mongodb+srv://admin:foiTTXlNEKLaJBwL@ccapdev.ifalvu3.mongodb.net/?retryWrites=true&w=majority&appName=ccapdev";
 
 mongoose.connect(dbURL).then(() => {
@@ -41,6 +40,18 @@ hbs.registerHelper('eq', function(a, b) {
     return a === b;
 });
 
+hbs.registerHelper('json', function(context) {
+    return JSON.stringify(context, null, 2);
+});
+
+hbs.registerHelper('formatDate', function(date) {
+    if (!date) return 'Invalid Date';
+    const parsedDate = new Date(date);
+    return isNaN(parsedDate) ? 'Invalid Date' : parsedDate.toLocaleDateString();
+});
+
+
+
 const isAuthenticated = (req, res, next) => {
     if (req.session.user) {
         next();
@@ -72,6 +83,17 @@ app.get('/userforum', isAuthenticated, async (req, res) => {
     } catch (err) {
         console.log('Error fetching posts:', err);
         res.status(500).send('Error fetching posts');
+    }
+});
+
+app.get('/userPosts', isAuthenticated, async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const posts = await Post.find({ user: userId }).sort({ createdAt: -1 }).lean();
+        res.json({ success: true, posts });
+    } catch (err) {
+        console.log('Error fetching user posts:', err);
+        res.status(500).json({ success: false, message: 'Error fetching user posts' });
     }
 });
 
@@ -143,10 +165,24 @@ app.post('/check-username-email', async (req, res) => {
     }
 });
 
-app.get("/profile", isAuthenticated, (req, res) => {
-    const userData = req.session.user;
-    res.render('profile', { userData });
+app.get('/profile', isAuthenticated, async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const user = await User.findById(userId).lean();
+        const posts = await Post.find({ user: user.username }).sort({ createdAt: -1 }).lean();
+
+        const userData = {
+            ...user,
+            posts
+        };
+
+        res.render('profile', { userData });
+    } catch (err) {
+        console.log('Error fetching user profile:', err);
+        res.status(500).send('Error fetching user profile');
+    }
 });
+
 
 app.get("/register", (req, res) => {
     res.sendFile(path.join(__dirname, "register.html"));
