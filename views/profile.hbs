@@ -13,8 +13,8 @@
         <a href="/userforum" class="navbar-logo">FORUM</a>
         <div class="navbar-links">
             <a href="/profile" class="navbar-user">
-                <img src="{{user.profilePicture}}" alt="User Profile">
-                <span>{{user.name}}</span>
+                <img src="{{userData.profilePicture}}" alt="User Profile">
+                <span>{{userData.username}}</span>
             </a>
             <a href="#"><i class="bi bi-bell"></i></a>
             <a href="/settings"><i class="bi bi-gear"></i></a>
@@ -22,32 +22,37 @@
     </nav>
 
     <!-- Profile Section -->
-    <div class="profile-container">
-        <div class="profile-sidebar">
-            <img src="{{user.profilePicture}}" alt="User Profile" class="profile-pic">
-            <h2>{{user.name}}</h2>
-            <p>{{user.bio}}</p>
-            <p>Joined: {{user.joinDate}}</p>
+    <div class="profile">
+        <div class="profile-info">
+            <h2><i class="bi bi-person-circle"></i> User Profile</h2>
+            <h3>{{userData.username}}</h3>
+            <p>{{userData.bio}}</p>
+            <p>Joined: {{formatDate userData.joinDate}}</p>
         </div>
-
-        <div class="profile-content">
+        <div class="profile-posts">
             <h3>Recent Posts</h3>
-            {{#each user.posts}}
-            <div class="post">
-                <div class="post-header">
-                    <span><i class="bi bi-calendar"></i> {{this.date}}</span>
-                    <h4>{{this.title}}</h4>
-                </div>
-                <div class="post-body">
-                    <p>{{this.content}}</p>
-                </div>
-                <div class="post-footer">
-                    <a href="#"><i class="bi bi-hand-thumbs-up"></i> {{this.likes}}</a>
-                    <a href="#"><i class="bi bi-hand-thumbs-down"></i> {{this.dislikes}}</a>
-                    <a href="#"><i class="bi bi-chat"></i> {{this.comments}} Comments</a>
-                </div>
-            </div>
-            {{/each}}
+            {{#if userData.posts.length}}
+                <ul>
+                    {{#each userData.posts}}
+                        <li>
+                            <div class="post-header">
+                                <span class="post-date"><i class="bi bi-calendar"></i> {{formatDate this.timestamp}}</span>
+                                <h4>{{this.title}}</h4>
+                            </div>
+                            <div class="post-body">
+                                <p>{{this.content}}</p>
+                            </div>
+                            <div class="post-footer">
+                                <a href="#"><i class="bi bi-hand-thumbs-up"></i> {{this.upvotes}}</a>
+                                <a href="#"><i class="bi bi-hand-thumbs-down"></i> {{this.downvotes}}</a>
+                                <a href="#"><i class="bi bi-chat"></i> {{this.comments.length}} Comments</a>
+                            </div>
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p>No recent posts</p>
+            {{/if}}
         </div>
     </div>
 </body>
