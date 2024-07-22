@@ -38,5 +38,5 @@ then
 npm install hbs mongoose express express-session express-fileupload cookie-parser mongodb
 then
 node index.js
-
+hello
 open browser, enter localhost:3000 sa search bar
