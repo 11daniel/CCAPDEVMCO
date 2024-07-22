@@ -347,6 +347,48 @@ app.post('/api/posts/:postId/comments', isAuthenticated, async (req, res) => {
     }
 });
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Delete/edit from db
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Edit post/comment
+app.post('/edit', async function(req, res) {
+    var commentId = req.query.commentId
+    var postId = req.query.postId
+    var content = req.body.content
+
+    if (commentId) {
+        var comment = await Comment.findOne({commentId: commentId})
+        await Comment.findOneAndUpdate({ commentId: commentId }, { content: content, edited: 1 })
+        res.redirect('/post?postId=' + comment.postId)
+
+    } else if (postId) {
+        var post = await Post.findOne({postId: postId})
+        await Post.findOneAndUpdate({ postId: postId}, { content: content, edited: 1 })
+        res.redirect('/post?postId=' + post.postId)
+    }
+});
+
+// Delete post/comment
+app.get('/delete', async function(req, res) {
+    var commentId = req.query.commentId
+    var postId = req.query.postId
+
+    if (commentId) {
+        var comment = await Comment.findOne({commentId: commentId})
+        await Comment.findOneAndUpdate({ commentId: commentId }, { content: '(Comment has been deleted)' })
+        res.redirect('/post?postId=' + comment.postId)
+
+    } else if (postId) {
+        await Post.findOneAndDelete({ postId: postId})
+        await Comment.deleteMany({ postId: postId })
+        res.redirect('/home')
+    }
+});
+
 app.listen(3000, () => {
     console.log("Server started on port 3000");
 });
