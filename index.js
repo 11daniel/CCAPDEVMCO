@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const path = require('path');
 const mongoose = require('mongoose');
 const hbs = require('hbs');
+const fs = require('fs');
 
 const dbURL = "mongodb+srv://admin:foiTTXlNEKLaJBwL@ccapdev.ifalvu3.mongodb.net/?retryWrites=true&w=majority&appName=ccapdev";
 
@@ -231,13 +232,20 @@ app.post("/createPost", isAuthenticated, async (req, res) => {
 app.post('/updateProfile', isAuthenticated, async (req, res) => {
     try {
         const updates = {};
-        
+
+        console.log('Received update request:', req.body);
+
         if (req.files && req.files.profilePicture) {
             const profilePicture = req.files.profilePicture;
-            const uploadPath = path.join(__dirname, 'public/uploads', profilePicture.name);
-            profilePicture.mv(uploadPath, (err) => {
-                if (err) return res.status(500).send(err);
-            });
+            const uploadDir = path.join(__dirname, 'public/uploads');
+            
+            // Ensure the upload directory exists
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+
+            const uploadPath = path.join(uploadDir, profilePicture.name);
+            await profilePicture.mv(uploadPath);
             updates.profilePicture = `/public/uploads/${profilePicture.name}`;
         }
 
@@ -249,14 +257,28 @@ app.post('/updateProfile', isAuthenticated, async (req, res) => {
             updates.username = req.body.username;
         }
 
+        console.log('Updating user with:', updates);
+
         const updatedUser = await User.findByIdAndUpdate(req.session.user._id, updates, { new: true });
+
+        if (!updatedUser) {
+            throw new Error('User not found');
+        }
 
         req.session.user = updatedUser;
         res.json({ success: true });
     } catch (err) {
-        res.json({ success: false });
+        console.error('Error updating profile:', err);
+        res.json({ success: false, message: err.message });
     }
 });
+
+app.use(fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 }, // Limit the file size to 50MB
+    abortOnLimit: true,
+    responseOnLimit: 'File size limit has been reached',
+}));
+
 
 app.post('/vote', isAuthenticated, async (req, res) => {
     const { postId, voteType } = req.body;
