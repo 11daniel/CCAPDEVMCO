@@ -4,6 +4,8 @@ const fileUpload = require('express-fileupload');
 const cookieParser = require("cookie-parser");
 const path = require('path');
 const mongoose = require('mongoose');
+const hbs = require('hbs');
+
 const dbURL = "mongodb+srv://admin:foiTTXlNEKLaJBwL@ccapdev.ifalvu3.mongodb.net/?retryWrites=true&w=majority&appName=ccapdev";
 
 mongoose.connect(dbURL).then(() => {
@@ -14,9 +16,10 @@ mongoose.connect(dbURL).then(() => {
 
 const Post = require("./models/POST");
 const User = require("./models/USER");
+
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-const hbs = require('hbs');
+
 app.set('view engine', 'hbs');
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
@@ -32,6 +35,20 @@ app.use(
 );
 
 app.use(cookieParser());
+
+hbs.registerHelper('eq', function(a, b) {
+    return a === b;
+});
+
+hbs.registerHelper('json', function(context) {
+    return JSON.stringify(context, null, 2);
+});
+
+hbs.registerHelper('formatDate', function(date) {
+    if (!date) return 'Invalid Date';
+    const parsedDate = new Date(date);
+    return isNaN(parsedDate) ? 'Invalid Date' : parsedDate.toLocaleDateString();
+});
 
 const isAuthenticated = (req, res, next) => {
     if (req.session.user) {
@@ -57,12 +74,27 @@ app.get("/forum", isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, "forum.html"));
 });
 
-app.get("/userforum", isAuthenticated, (req, res) => {
-    const userData = req.session.user;
-    res.render('userforum', { userData });
+app.get('/userforum', isAuthenticated, async (req, res) => {
+    try {
+        const posts = await Post.find().lean();
+        res.render('userforum', { userData: req.session.user, posts });
+    } catch (err) {
+        console.log('Error fetching posts:', err);
+        res.status(500).send('Error fetching posts');
+    }
 });
 
-// Route to settings.hbs
+app.get('/userPosts', isAuthenticated, async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const posts = await Post.find({ user: userId }).sort({ createdAt: -1 }).lean();
+        res.json({ success: true, posts });
+    } catch (err) {
+        console.log('Error fetching user posts:', err);
+        res.status(500).json({ success: false, message: 'Error fetching user posts' });
+    }
+});
+
 app.get("/settings", isAuthenticated, (req, res) => {
     const userData = req.session.user;
     res.render('settings', { userData });
@@ -131,21 +163,28 @@ app.post('/check-username-email', async (req, res) => {
     }
 });
 
-app.get("/userforum", isAuthenticated, async (req, res) => {
+app.get('/profile', isAuthenticated, async (req, res) => {
     try {
-        const posts = await Post.find().sort({ createdAt: -1 }); // Fetch posts sorted by creation date
-        res.render('userforum', { posts, userData: req.session.user });
+        const userId = req.session.user._id;
+        const user = await User.findById(userId).lean();
+        const posts = await Post.find({ user: user.username }).sort({ createdAt: -1 }).lean();
+
+        const userData = {
+            ...user,
+            posts: posts.map(post => ({
+                ...post,
+                createdAt: new Date(post.createdAt)
+            }))
+        };
+
+        res.render('profile', { userData });
     } catch (err) {
-        console.log("Error fetching posts!", err);
-        res.redirect("/");
+        console.log('Error fetching user profile:', err);
+        res.status(500).send('Error fetching user profile');
     }
 });
 
 
-app.get("/profile", isAuthenticated, (req, res) => {
-    const userData = req.session.user;
-    res.render('profile', { userData });
-});
 
 app.get("/register", (req, res) => {
     res.sendFile(path.join(__dirname, "register.html"));
@@ -168,7 +207,6 @@ app.get('/api/posts', isAuthenticated, async (req, res) => {
     }
 });
 
-
 app.post("/createPost", isAuthenticated, async (req, res) => {
     const { title, content } = req.body;
     try {
@@ -183,13 +221,12 @@ app.post("/createPost", isAuthenticated, async (req, res) => {
             createdAt: new Date()
         });
         await newPost.save();
-        res.json(newPost); // Return the new post
+        res.json(newPost);
     } catch (err) {
         console.log("Error creating post!", err);
         res.status(500).json({ error: "Error creating post" });
     }
 });
-
 
 app.post('/updateProfile', isAuthenticated, async (req, res) => {
     try {
@@ -221,7 +258,73 @@ app.post('/updateProfile', isAuthenticated, async (req, res) => {
     }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log('Listening to port 3000');
+app.post('/vote', isAuthenticated, async (req, res) => {
+    const { postId, voteType } = req.body;
+    const userId = req.session.user._id.toString();
+
+    try {
+        const post = await Post.findById(postId);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const currentVote = post.voters.get(userId);
+
+        if (currentVote === voteType) {
+            if (voteType === 'upvote') {
+                post.upvotes--;
+            } else {
+                post.downvotes--;
+            }
+            post.voters.delete(userId);
+        } else {
+            if (currentVote === 'upvote') {
+                post.upvotes--;
+            } else if (currentVote === 'downvote') {
+                post.downvotes--;
+            }
+
+            if (voteType === 'upvote') {
+                post.upvotes++;
+            } else {
+                post.downvotes++;
+            }
+            post.voters.set(userId, voteType);
+        }
+
+        await post.save();
+        res.json({ success: true, post });
+    } catch (err) {
+        console.log('Error voting on post!', err);
+        res.status(500).json({ error: 'Error voting on post' });
+    }
+});
+
+app.post('/api/posts/:postId/comments', isAuthenticated, async (req, res) => {
+    const { postId } = req.params;
+    const { commentText } = req.body;
+    const userId = req.session.user._id;
+    const username = req.session.user.username;
+
+    try {
+        const post = await Post.findById(postId);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const newComment = { user: username, text: commentText, createdAt: new Date() };
+        post.comments.push(newComment);
+        await post.save();
+
+        res.json({ success: true, post });
+    } catch (err) {
+        console.log('Error adding comment!', err);
+        res.status(500).json({ error: 'Error adding comment' });
+    }
+});
+
+app.listen(3000, () => {
+    console.log("Server started on port 3000");
 });

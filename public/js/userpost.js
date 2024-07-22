@@ -1,183 +1,182 @@
 $(document).ready(function () {
-  // Function to render posts
-  function renderPosts(posts) {
-      const postList = $('#post-list');
-      postList.empty();
-      posts.forEach(post => {
-          const postElement = createPostElement(post);
-          postList.append(postElement);
-      });
-  }
+    function renderPosts(posts) {
+        const postList = $('#post-list');
+        postList.empty();
+        posts.forEach(post => {
+            const postElement = createPostElement(post);
+            postList.append(postElement);
+        });
+    }
 
-  // Function to create post element
-  function createPostElement(post) {
-      return `
-          <li class="post" data-id="${post._id}">
-              <div class="user">
-                  <img src="/path/to/avatar.jpg" alt="User Avatar"> <!-- Adjust the avatar path -->
-                  <span>${post.user}</span>
-              </div>
-              <div class="content">
-                  <h3><a href="#">${post.title}</a></h3>
-                  <p>Posted by ${post.user} | ${new Date(post.createdAt).toLocaleString()}</p>
-                  <p>${post.content}</p>
-                  <div class="voting">
-                      <button class="upvote-button">Upvote</button>
-                      <span class="upvote-counter">${post.upvotes}</span>
-                      <button class="downvote-button">Downvote</button>
-                      <span class="downvote-counter">${post.downvotes}</span>
-                  </div>
-                  <div class="comment-section">
-                      <ul class="comment-list">
-                          ${post.comments.map(comment => `<li class="comment">${comment}</li>`).join('')}
-                      </ul>
-                      <form class="comment-form">
-                          <textarea name="commentText" placeholder="Add a comment..."></textarea>
-                          <button type="submit">Submit</button>
-                      </form>
-                  </div>
-              </div>
-          </li>
-      `;
-  }
+    function createPostElement(post) {
+        return `
+            <li class="post" data-id="${post._id}">
+                <div class="user">
+                    <img src="/path/to/avatar.jpg" alt="User Avatar">
+                    <span>${post.user}</span>
+                </div>
+                <div class="content">
+                    <h3><a href="#">${post.title}</a></h3>
+                    <p>Posted by ${post.user} | ${new Date(post.timestamp).toLocaleString()}</p>
+                    <p>${post.content}</p>
+                    <div class="voting">
+                        <button class="upvote-button">Upvote</button>
+                        <span class="upvote-counter">${post.upvotes}</span>
+                        <button class="downvote-button">Downvote</button>
+                        <span class="downvote-counter">${post.downvotes}</span>
+                    </div>
+                    <div class="comment-section">
+                        <ul class="comment-list">
+                            ${post.comments.map(comment => `<li class="comment"><strong>${comment.user}</strong>: ${comment.text}</li>`).join('')}
+                        </ul>
+                        <form class="comment-form">
+                            <textarea name="commentText" placeholder="Add a comment..."></textarea>
+                            <button type="submit">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </li>
+        `;
+    }
 
-  // Function to handle new post submission
-  function handleNewPost(event) {
-      event.preventDefault();
-      const title = $('#new-post-title').val();
-      const content = $('#new-post-content').val();
+    function handleNewPost(event) {
+        event.preventDefault();
+        const title = $('#new-post-title').val();
+        const content = $('#new-post-content').val();
 
-      $.ajax({
-          type: 'POST',
-          url: '/createPost',
-          data: { title, content },
-          success: function(newPost) {
-              $('#new-post-title').val('');
-              $('#new-post-content').val('');
-              const newPostElement = createPostElement(newPost);
-              $('#post-list').prepend(newPostElement); // Prepend to the list
-          },
-          error: function(err) {
-              console.log('Error creating post:', err);
-          }
-      });
-  }
+        $.ajax({
+            type: 'POST',
+            url: '/createPost',
+            data: { title, content },
+            success: function(newPost) {
+                $('#new-post-title').val('');
+                $('#new-post-content').val('');
+                const newPostElement = createPostElement(newPost);
+                $('#post-list').prepend(newPostElement);
+            },
+            error: function(err) {
+                console.log('Error creating post:', err);
+            }
+        });
+    }
 
-  $('#new-post-form').on('submit', handleNewPost);
+    $('#new-post-form').on('submit', handleNewPost);
 
-  // Function to handle new comment submission
-  function handleNewComment(event) {
-      event.preventDefault();
-      const commentText = $(this).find('textarea[name="commentText"]').val();
-      const postIndex = $(this).closest('.post').data('index');
-      if (commentText) {
-          initialPosts[postIndex].comments.push(commentText);
-          renderPosts(initialPosts);
-      }
-  }
+    function handleNewComment(event) {
+        event.preventDefault();
+        const commentText = $(this).find('textarea[name="commentText"]').val();
+        const postId = $(this).closest('.post').data('id');
 
-  // Initial render of posts
-  $.get('/api/posts', function(data) {
-      renderPosts(data.posts);
-  });
+        $.ajax({
+            type: 'POST',
+            url: `/api/posts/${postId}/comments`,
+            data: { commentText },
+            success: function(response) {
+                if (response.success) {
+                    renderPosts([response.post]);
+                }
+            },
+            error: function(err) {
+                console.log('Error adding comment:', err);
+            }
+        });
+    }
 
-  // Event listener for new comment submission
-  $('#post-list').on('submit', '.comment-form', handleNewComment);
+    $('#post-list').on('submit', '.comment-form', handleNewComment);
 
-  // Function to handle upvote
-  function handleUpvote(event) {
-      event.preventDefault();
-      const postIndex = $(this).closest('.post').data('index');
-      const post = initialPosts[postIndex];
+    function handleVote(event, voteType) {
+        event.preventDefault();
+        const postId = $(this).closest('.post').data('id');
 
-      if (post.voted === 'up') {
-          post.upvotes--;
-          post.voted = null;
-      } else {
-          if (post.voted === 'down') {
-              post.downvotes--;
-          }
-          post.upvotes++;
-          post.voted = 'up';
-      }
+        $.ajax({
+            type: 'POST',
+            url: '/vote',
+            data: { postId, voteType },
+            success: function(response) {
+                if (response.success) {
+                    const updatedPost = response.post;
+                    $(`li[data-id='${updatedPost._id}'] .upvote-counter`).text(updatedPost.upvotes);
+                    $(`li[data-id='${updatedPost._id}'] .downvote-counter`).text(updatedPost.downvotes);
+                }
+            },
+            error: function(err) {
+                console.log('Error voting on post:', err);
+            }
+        });
+    }
 
-      renderPosts(initialPosts);
-  }
+    function handleDeletePost(event) {
+        event.preventDefault();
+        const postId = $(this).closest('.post').data('id');
 
-  // Function to handle downvote
-  function handleDownvote(event) {
-      event.preventDefault();
-      const postIndex = $(this).closest('.post').data('index');
-      const post = initialPosts[postIndex];
+        $.ajax({
+            type: 'DELETE',
+            url: `/api/posts/${postId}`,
+            success: function(response) {
+                if (response.success) {
+                    $(`li[data-id='${postId}']`).remove();
+                }
+            },
+            error: function(err) {
+                console.log('Error deleting post:', err);
+            }
+        });
+    }
 
-      if (post.voted === 'down') {
-          post.downvotes--;
-          post.voted = null;
-      } else {
-          if (post.voted === 'up') {
-              post.upvotes--;
-          }
-          post.downvotes++;
-          post.voted = 'down';
-      }
+    function handleDeleteComment(event) {
+        event.preventDefault();
+        const postId = $(this).closest('.post').data('id');
+        const commentId = $(this).closest('.comment').data('comment-id');
 
-      renderPosts(initialPosts);
-  }
+        $.ajax({
+            type: 'DELETE',
+            url: `/api/posts/${postId}/comments/${commentId}`,
+            success: function(response) {
+                if (response.success) {
+                    $(`li[data-comment-id='${commentId}']`).remove();
+                }
+            },
+            error: function(err) {
+                console.log('Error deleting comment:', err);
+            }
+        });
+    }
 
-  // Event listener for upvote button
-  $('#post-list').on('click', '.upvote-button', handleUpvote);
+    $('#post-list').on('click', '.delete-post-button', handleDeletePost);
+    $('#post-list').on('click', '.delete-comment-button', handleDeleteComment);
 
-  // Event listener for downvote button
-  $('#post-list').on('click', '.downvote-button', handleDownvote);
+    $('#post-list').on('click', '.upvote-button', function(event) {
+        handleVote.call(this, event, 'upvote');
+    });
 
-  // Show back-to-top button when scrolled down
-  $(window).scroll(function() {
-      if ($(this).scrollTop() > 300) {
-          $('#back-to-top').fadeIn();
-      } else {
-          $('#back-to-top').fadeOut();
-      }
-  });
+    $('#post-list').on('click', '.downvote-button', function(event) {
+        handleVote.call(this, event, 'downvote');
+    });
 
-  // Scroll back to top when button is clicked
-  $('#back-to-top').click(function() {
-      $('html, body').animate({scrollTop: 0}, 600);
-      return false;
-  });
+    $.get('/api/posts', function(data) {
+        renderPosts(data.posts);
+    });
 
-  // Event listeners for filter buttons
-  $('#latest-posts').click(function() {
-      const latestPosts = initialPosts.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      renderPosts(latestPosts);
-  });
+    $(window).scroll(function() {
+        if ($(this).scrollTop() > 300) {
+            $('#back-to-top').fadeIn();
+        } else {
+            $('#back-to-top').fadeOut();
+        }
+    });
 
-  $('#popular-posts').click(function() {
-      const popularPosts = initialPosts.slice().sort((a, b) => b.upvotes - a.upvotes);
-      renderPosts(popularPosts);
-  });
+    $('#back-to-top').click(function() {
+        $('html, body').animate({scrollTop: 0}, 600);
+        return false;
+    });
 
-  // Function to format timestamp
-  function formatTimestamp(timestamp) {
-      const date = new Date(timestamp);
-      const now = new Date();
-      const timeDiff = now - date;
+    $('#latest-posts').click(function() {
+        const latestPosts = initialPosts.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        renderPosts(latestPosts);
+    });
 
-      const seconds = Math.floor(timeDiff / 1000);
-      const minutes = Math.floor(seconds / 60);
-      const hours = Math.floor(minutes / 60);
-      const days = Math.floor(hours / 24);
-      const weeks = Math.floor(days / 7);
-
-      if (seconds < 60) {
-          return `${seconds} seconds ago`;
-      } else if (minutes < 60) {
-          return `${minutes} minutes ago`;
-      } else if (hours < 24) {
-          return `${hours} hours ago`;
-      } else if (days < 7) {
-          return `${days} days ago`;
-      } else {
-          return `${weeks} weeks ago`;
-      }
-  }
+    $('#popular-posts').click(function() {
+        const popularPosts = initialPosts.slice().sort((a, b) => b.upvotes - a.upvotes);
+        renderPosts(popularPosts);
+    });
 });
