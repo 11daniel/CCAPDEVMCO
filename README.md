@@ -6,6 +6,7 @@ The MCO is a web application built with Node.js, Express, Handlebars, and MongoD
 
 - [Contributions](#contributions)
 - [Installation](#installation)
+- [Usage](#usage)
 - [Dependencies](#dependencies)
 ## Contributions
 Section: S13 </br>
@@ -31,7 +32,7 @@ To get a local copy up and running, follow these simple steps.
     ```bash
     npm install
     ```
-- [[More Details]](https://github.com/11daniel/CCAPDEVMCO/main/READ.txt)
+- [[More Details]](https://github.com/11daniel/CCAPDEVMCO/blob/8e1125bee7dda03d3d923b15d50e461691964bef/READ.txt)
 ## Usage
 
 To run the application, use the following command:
@@ -39,7 +40,7 @@ To run the application, use the following command:
 ```bash
 node index.js
 ```
-## Dependecies
+## Dependencies
 Express - Fast, unopinionated, minimalist web framework for Node.js </br>
 Handlebars - Simple templating language </br>
 Mongoose - Elegant MongoDB object modeling for Node.js </br>
