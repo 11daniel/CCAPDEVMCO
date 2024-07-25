@@ -1,352 +1,309 @@
-const express = require("express");
-const session = require("express-session");
-const fileUpload = require('express-fileupload');
-const cookieParser = require("cookie-parser");
-const path = require('path');
-const mongoose = require('mongoose');
-const hbs = require('hbs');
-const fs = require('fs');
+// index.js
 
-const dbURL = "mongodb+srv://admin:foiTTXlNEKLaJBwL@ccapdev.ifalvu3.mongodb.net/?retryWrites=true&w=majority&appName=ccapdev";
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// App stuff
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-mongoose.connect(dbURL).then(() => {
-    console.info('Connected to App Demo Data Base');
-}).catch((e) => {
-    console.log('Error Connecting to App Demo Data Base');
+var mongoose = require('mongoose');
+var express = require('express');
+var app = express();
+
+mongoose.connect('mongodb://localhost/ccappdevDB');
+
+app.use('/stylesheets', express.static(__dirname + '/stylesheets'));
+app.use('/images', express.static(__dirname + '/images'));
+app.use(express.static(__dirname));
+
+var fileUpload = require('express-fileupload')
+
+var Post = require("./models/Post");
+var Community = require("./models/Community");
+var Comment = require("./models/Comment");
+var User = require("./models/User");
+
+var path = require('path');
+
+var hbs = require('hbs')
+app.set('view engine','hbs');
+
+app.use(express.json()); // use json
+app.use(express.urlencoded({extended: true})); // files consist of more than strings
+app.use(express.static('public')); // we'll add a static directory named "public"
+app.use(fileUpload()); // for fileuploads
+
+var session = require('express-session');
+var MongoStore = require('connect-mongo');
+
+hbs.registerHelper('calculateVotes', function(upvotes, downvotes) {
+    return upvotes.length - downvotes.length;
 });
 
-const Post = require("./models/POST");
-const User = require("./models/USER");
+hbs.registerHelper('reverse', function(array) {
+    return array.slice().reverse();
+});
 
-const app = express();
-app.use(express.urlencoded({ extended: true }));
+hbs.registerHelper('sortByProperty', function(array, property) {
+    return array.slice().sort((a, b) => {
+        var valueA = a[property].toLowerCase(); 
+        var valueB = b[property].toLowerCase(); 
 
-app.set('view engine', 'hbs');
+        if (valueA < valueB) {
+            return -1;
+        } else if (valueA > valueB) {
+            return 1;
+        } else {
+            return 0;
+        }
+    });
+});
 
-app.use('/public', express.static(path.join(__dirname, 'public')));
-app.use(express.json());
-app.use(fileUpload());
+hbs.registerHelper('calculateTotalVotes', function(posts) {
+    var totalUpvotes = 0;
+    var totalDownvotes = 0;
 
+    posts.forEach(post => {
+        totalUpvotes += post.upvotes.length;
+        totalDownvotes += post.downvotes.length;
+    });
+
+    // Calculate the difference between total upvotes and downvotes
+    var difference = totalUpvotes - totalDownvotes;
+
+    return difference;
+});
+
+hbs.registerHelper('times', function(number) {
+    return number * 35;
+});
+
+hbs.registerHelper('length', function(array) {
+    return array.length;
+});
+
+hbs.registerHelper('removeFirst', function(string) {
+    return string.slice(1);
+});
+
+hbs.registerHelper('commentLevelSymbol', function(number) {
+    var symbols = '';
+    for (var i = 0; i < number; i++) {
+        symbols += '|';
+    }
+    return symbols;
+});
+
+hbs.registerHelper('edited', function(number) {
+    if (number === 1) {
+        return 'Edited'
+    } else {
+        return ''
+    }
+});
+
+hbs.registerHelper('upvotes', function(upvotes, username) {
+    if (upvotes.includes(username)) {
+        return username;
+    }
+});
+
+hbs.registerHelper('downvotes', function(downvotes, username) {
+    if (downvotes.includes(username)) {
+        return username;
+    }
+});
+
+//Session
 app.use(
     session({
-        secret: "secret-key",
+        secret: 'hello',
         resave: false,
         saveUninitialized: false,
+        cookie: {
+            secure: false,
+            httpOnly: true,
+            maxAge: 3 * 7 * 24 * 60 * 60 * 1000
+        },
+        store: MongoStore.create({ 
+            mongoUrl: 'mongodb://localhost/ccappdevDB',
+            collectionName: 'sessions' 
+        })
     })
 );
 
-app.use(cookieParser());
+// Set username value after logging in
+app.post('/submit-login', async function(req, res) {
+    var { username, password, remember } = req.body;
 
-hbs.registerHelper('eq', function(a, b) {
-    return a === b;
-});
+    var user = await User.findOne({ username: username });
 
-hbs.registerHelper('json', function(context) {
-    return JSON.stringify(context, null, 2);
-});
-
-hbs.registerHelper('formatDate', function(date) {
-    if (!date) return 'Invalid Date';
-    const parsedDate = new Date(date);
-    return isNaN(parsedDate) ? 'Invalid Date' : parsedDate.toLocaleDateString();
-});
-
-const isAuthenticated = (req, res, next) => {
-    if (req.session.user) {
-        next();
-    } else {
-        res.redirect("/login");
-    }
-};
-
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
-});
-
-app.get("/login", (req, res) => {
-    if (req.session.user) {
-        res.redirect("/profile");
-    } else {
-        res.sendFile(path.join(__dirname, "login.html"));
-    }
-});
-
-app.get("/forum", isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, "forum.html"));
-});
-
-app.get('/userforum', isAuthenticated, async (req, res) => {
-    try {
-        const posts = await Post.find().lean();
-        res.render('userforum', { userData: req.session.user, posts });
-    } catch (err) {
-        console.log('Error fetching posts:', err);
-        res.status(500).send('Error fetching posts');
-    }
-});
-
-app.get('/userPosts', isAuthenticated, async (req, res) => {
-    try {
-        const userId = req.session.user._id;
-        const posts = await Post.find({ user: userId }).sort({ createdAt: -1 }).lean();
-        res.json({ success: true, posts });
-    } catch (err) {
-        console.log('Error fetching user posts:', err);
-        res.status(500).json({ success: false, message: 'Error fetching user posts' });
-    }
-});
-
-app.get("/settings", isAuthenticated, (req, res) => {
-    const userData = req.session.user;
-    res.render('settings', { userData });
-});
-
-app.post("/login", express.urlencoded({ extended: true }), async (req, res) => {
-    const user = req.body;
-    try {
-        const foundUser = await User.findOne(user);
-        if (foundUser) {
-            req.session.user = foundUser;
-            res.cookie("sessionId", req.sessionID);
-            res.redirect("/profile");
+    if (user && user.password === password) {
+        if (remember) {
+            req.session.username = username;
+            console.log('sessionUsername: ' + req.session.username)
         } else {
-            console.log("User not found!");
-            res.redirect("/login");
+            req.session.username = username;
+            req.session.cookie.expires = false;
         }
-    } catch (err) {
-        console.log("Error!", err);
-        res.redirect("/login");
-    }
-});
-
-app.post("/register", express.urlencoded({ extended: true }), async (req, res) => {
-    try {
-        if (req.body.password !== req.body['confirm-password']) {
-            return res.status(400).send('Passwords do not match');
-        }
-
-        const existingUser = await User.findOne({
-            $or: [
-                { email: req.body.email },
-                { username: req.body.username }
-            ]
-        });
-
-        if (existingUser) {
-            return res.status(400).send('Email or username already registered');
-        }
-
-        await User.create({ username: req.body.username, email: req.body.email, password: req.body.password });
-        res.redirect("/login");
-    } catch (err) {
-        console.log("Error!", err);
-        res.redirect("/register");
-    }
-});
-
-app.post('/check-username-email', async (req, res) => {
-    const { username, email } = req.body;
-    const user = await User.findOne({
-        $or: [
-            { email: email },
-            { username: username }
-        ]
-    });
-    if (user) {
-        res.json({
-            exists: {
-                email: user.email === email,
-                username: user.username === username
-            }
-        });
+        res.redirect('/home');
     } else {
-        res.json({ exists: false });
+        res.redirect('/?login=failed');
     }
 });
 
-app.get('/profile', isAuthenticated, async (req, res) => {
-    try {
-        const userId = req.session.user._id;
-        const user = await User.findById(userId).lean();
-        const posts = await Post.find({ user: user.username }).sort({ createdAt: -1 }).lean();
-
-        const userData = {
-            ...user,
-            posts: posts.map(post => ({
-                ...post,
-                createdAt: new Date(post.createdAt)
-            }))
-        };
-
-        res.render('profile', { userData });
-    } catch (err) {
-        console.log('Error fetching user profile:', err);
-        res.status(500).send('Error fetching user profile');
+app.get('/', async function(req, res) {
+    if (req.session.username) {
+        req.session.username = req.session.username;
+        res.redirect('/home');
+    } else {
+        res.render('index'); //index.hbs
     }
 });
 
-
-
-app.get("/register", (req, res) => {
-    res.sendFile(path.join(__dirname, "register.html"));
+const guest = new User({
+    username: '!!',
+    img: 'profile.jpg',
+    description: 'This is a guest user.',
+    userSince: 0, 
+    password: '!!' 
 });
 
-app.get("/logout", (req, res) => {
-    req.session.destroy(() => {
-        res.clearCookie("sessionId");
-        res.redirect("/");
+app.get('/guest', async function(req, res) {
+    req.session.username = '!!'
+    req.session.cookie.expires = false
+    res.redirect('home')
+});
+
+app.get('/logout', async function(req, res) {
+    req.session.destroy();
+    res.redirect('/');
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Add stuff to db 
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Create post
+app.post('/submit-post', async function(req, res) {
+    var today = new Date();
+    var formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+
+    var latestPost = await Post.findOne().sort({ postId: -1 });
+    var newPostId = latestPost ? latestPost.postId + 1 : 1;
+
+    await Post.create({
+        postId: newPostId,
+        date: formattedDate,
+        user: req.session.username,
+        upvotes: [],
+        downvotes: [],
+        edited: 0,
+        ...req.body,
     });
+
+    res.redirect('/home');
 });
 
-app.get('/api/posts', isAuthenticated, async (req, res) => {
-    try {
-        const posts = await Post.find().sort({ createdAt: -1 });
-        res.json({ posts });
-    } catch (err) {
-        console.log("Error fetching posts!", err);
-        res.status(500).json({ error: "Error fetching posts" });
-    }
-});
-
-app.post("/createPost", isAuthenticated, async (req, res) => {
-    const { title, content } = req.body;
-    try {
-        const newPost = new Post({
-            user: req.session.user.username,
-            title,
-            content,
-            comments: [],
-            upvotes: 0,
-            downvotes: 0,
-            voted: null,
-            createdAt: new Date()
+// Create community
+app.post('/submit-community', async function(req, res) {
+    var communityName = '#' + req.body.name
+    if (await Community.findOne({ name: { $regex: new RegExp('^' + communityName + '$', 'i') } })) {
+        res.redirect('/home?community=failed')
+    } else {
+        await Community.create({
+            ...req.body,
+            name: communityName
         });
-        await newPost.save();
-        res.json(newPost);
-    } catch (err) {
-        console.log("Error creating post!", err);
-        res.status(500).json({ error: "Error creating post" });
+        res.redirect('/home?community=success')
     }
 });
 
-app.post('/updateProfile', isAuthenticated, async (req, res) => {
-    try {
-        const updates = {};
-
-        console.log('Received update request:', req.body);
-
-        if (req.files && req.files.profilePicture) {
-            const profilePicture = req.files.profilePicture;
-            const uploadDir = path.join(__dirname, 'public/uploads');
-            
-            // Ensure the upload directory exists
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            }
-
-            const uploadPath = path.join(uploadDir, profilePicture.name);
-            await profilePicture.mv(uploadPath);
-            updates.profilePicture = `/public/uploads/${profilePicture.name}`;
-        }
-
-        if (req.body.bio) {
-            updates.bio = req.body.bio;
-        }
-
-        if (req.body.username) {
-            updates.username = req.body.username;
-        }
-
-        console.log('Updating user with:', updates);
-
-        const updatedUser = await User.findByIdAndUpdate(req.session.user._id, updates, { new: true });
-
-        if (!updatedUser) {
-            throw new Error('User not found');
-        }
-
-        req.session.user = updatedUser;
-        res.json({ success: true });
-    } catch (err) {
-        console.error('Error updating profile:', err);
-        res.json({ success: false, message: err.message });
+// Create user
+app.post('/submit-user', async function(req, res) {
+    if (await User.findOne({ username: { $regex: new RegExp('^' + req.body.username + '$', 'i') } })) {
+        res.redirect('/?register=failed')
+    } else {
+        var currentYear = new Date().getFullYear()
+        await User.create({
+            ...req.body,
+            img: 'profile.jpg',
+            description: '',
+            userSince: currentYear,
+        });
+        res.redirect('/?register=success')
     }
 });
 
-app.use(fileUpload({
-    limits: { fileSize: 50 * 1024 * 1024 }, // Limit the file size to 50MB
-    abortOnLimit: true,
-    responseOnLimit: 'File size limit has been reached',
-}));
+// Create comment
+app.post('/submit-comment', async function(req, res) {
+    var postId = Number(req.query.postId);
+    if (req.session.username !== '!!') { 
+        var today = new Date();
+        var formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
 
+        var latestComment = await Comment.findOne().sort({ commentId: -1 });
+        var newCommentId = latestComment ? latestComment.commentId + 1 : 1;
+        
+        var parentId = req.query.parentId ? Number(req.query.parentId) : null; 
 
-app.post('/vote', isAuthenticated, async (req, res) => {
-    const { postId, voteType } = req.body;
-    const userId = req.session.user._id.toString();
+        var level = parentId ? await calculateCommentLevel(parentId) + 1 : 0; 
 
-    try {
-        const post = await Post.findById(postId);
-
-        if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
-        }
-
-        const currentVote = post.voters.get(userId);
-
-        if (currentVote === voteType) {
-            if (voteType === 'upvote') {
-                post.upvotes--;
-            } else {
-                post.downvotes--;
-            }
-            post.voters.delete(userId);
-        } else {
-            if (currentVote === 'upvote') {
-                post.upvotes--;
-            } else if (currentVote === 'downvote') {
-                post.downvotes--;
-            }
-
-            if (voteType === 'upvote') {
-                post.upvotes++;
-            } else {
-                post.downvotes++;
-            }
-            post.voters.set(userId, voteType);
-        }
-
-        await post.save();
-        res.json({ success: true, post });
-    } catch (err) {
-        console.log('Error voting on post!', err);
-        res.status(500).json({ error: 'Error voting on post' });
+        await Comment.create({
+            commentId: newCommentId,
+            date: formattedDate,
+            user: req.session.username,
+            postId: postId,
+            parentId: parentId,
+            level: level, 
+            edited: 0,
+            ...req.body,
+        });
+        res.redirect('/post?postId=' + postId);
+    } else {
+        res.redirect('/post?postId=' + postId)
     }
 });
 
-app.post('/api/posts/:postId/comments', isAuthenticated, async (req, res) => {
-    const { postId } = req.params;
-    const { commentText } = req.body;
-    const userId = req.session.user._id;
-    const username = req.session.user.username;
-
-    try {
-        const post = await Post.findById(postId);
-
-        if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
-        }
-
-        const newComment = { user: username, text: commentText, createdAt: new Date() };
-        post.comments.push(newComment);
-        await post.save();
-
-        res.json({ success: true, post });
-    } catch (err) {
-        console.log('Error adding comment!', err);
-        res.status(500).json({ error: 'Error adding comment' });
+async function calculateCommentLevel(commentId) {
+    var comment = await Comment.findOne({ commentId: commentId }).exec();
+    if (!comment) {
+        return -1; // Comment not found
     }
-});
+    if (!comment.parentId) {
+        return 0; // Top-level comment
+    }
+    // Recursive call to find the parent comment's level
+    var parentLevel = await calculateCommentLevel(comment.parentId);
+    return parentLevel + 1;
+}
 
+function sortComments(comments) {
+    comments.sort((a, b) => b.commentId - a.commentId);
+    var commentsByParentId = new Map();
+
+    comments.forEach(comment => {
+        var parentId = comment.parentId || 0; 
+        if (!commentsByParentId.has(parentId)) {
+            commentsByParentId.set(parentId, []);
+        }
+        commentsByParentId.get(parentId).push(comment);
+    });
+
+    var sortedComments = [];
+    function addComments(parentId) {
+        var comments = commentsByParentId.get(parentId) || [];
+        comments.forEach(comment => {
+            sortedComments.push(comment);
+            addComments(comment.commentId); 
+        });
+    }
+    addComments(0); 
+
+    return sortedComments;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -389,6 +346,175 @@ app.get('/delete', async function(req, res) {
     }
 });
 
-app.listen(3000, () => {
-    console.log("Server started on port 3000");
+// Edit profile
+app.post('/submit-edit-profile', async function(req, res) {
+    var username = req.session.username
+    var updates = {}
+
+    if (req.files && req.files.image) {
+        var { image } = req.files
+        await image.mv(path.resolve(__dirname, 'images', image.name));
+        updates.img = image.name
+    }
+
+    if (req.body.description) {
+        updates.description = req.body.description
+    }
+
+    await User.findOneAndUpdate({ username: username }, updates)
+
+    res.redirect('/profile');
+});
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Render stuff 
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+app.get('/home', async function(req,res) {
+    var communities = await Community.find({})
+    if (req.session.username !== '!!') {
+        var posts = await Post.find({})
+        var user = await User.findOne({ username: req.session.username })
+        console.log(user)
+        res.render('home', { posts, user, communities })
+    } else {
+        var posts = await Post.find({}).sort({ createdAt: -1 }).limit(20)
+        var user = guest
+        res.render('home', { posts, user, communities })
+    }
+});
+
+app.get('/post', async function(req, res) {
+    var postId = Number(req.query.postId)
+    var post = await Post.findOne({ postId: postId })
+    var comments = await Comment.find({ postId: postId })
+    
+    comments = sortComments(comments);
+
+    if (req.session.username !== '!!') { 
+        var user = await User.findOne({ username: req.session.username })
+    } else {
+        var user = guest
+    }
+    res.render('post', { post, comments, user })
+});
+
+app.get('/create-post', async function(req, res) {
+    if (req.session.username !== '!!') { 
+        var communities = await Community.find({})
+        var user = await User.findOne({ username: req.session.username })
+        res.render('create-post', { communities, user })
+    }
+});
+
+app.get('/profile', async function(req, res) {
+    var username
+    if (req.query.username) {
+        username = req.query.username
+    } else if (req.session.username !== '!!') {
+        username = req.session.username
+    } else {
+        return
+    }
+    console.log('username: ' + username)
+    var posts = await Post.find({ user: username })
+    var comments = await Comment.find({ user: username })
+    var user = await User.findOne({ username: username })
+    res.render('profile', { posts, comments, user })
+
+});
+
+app.get('/community', async function(req, res) {
+    var communityName = '#' + req.query.community
+    console.log('communityName: ' + communityName)
+
+    var community = await Community.findOne({ name: communityName})
+    var posts = await Post.find({ community: communityName })
+    var user = await User.findOne({ username: req.session.username })
+
+    console.log('community: ' + community, 'posts: ' + posts)
+
+    res.render('community', { community, posts, user })    
+});
+
+app.get('/edit-profile', async function(req, res) {
+    var user = await User.findOne({ username: req.session.username })
+    res.render('edit-profile', { user })
+});
+
+app.get('/register', async function(req, res) {
+    res.render('register');
+});
+
+app.get('/create-community', async function(req, res) {
+    if (req.session.username !== '!!') { 
+        res.render('create-community');
+    }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                           //
+//                                      UPVOTES AND DOWNVOTES                                                //
+//                                                                                                           //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Upvote
+app.get('/upvote', async function(req, res) {
+    if (req.session.username !== '!!') { 
+        var post = await Post.findOne({ postId: req.query.postId })
+        var username = req.session.username
+
+        var indexInUpvotes = post.upvotes.indexOf(username);
+        var indexInDownvotes = post.downvotes.indexOf(username);
+
+        if (indexInUpvotes === -1 && indexInDownvotes === -1) {
+            // If username is not in post.upvotes[] nor in post.downvotes[]
+            post.upvotes.push(username);
+        } else if (indexInUpvotes !== -1) {
+            // If username is already in post.upvotes[]
+            post.upvotes.splice(indexInUpvotes, 1);
+        } else if (indexInDownvotes !== -1) {
+            // If username is already in post.downvotes[]
+            post.downvotes.splice(indexInDownvotes, 1);
+            post.upvotes.push(username);
+        }
+
+        await post.save();
+        res.redirect('/post?postId=' + req.query.postId)
+    }
+});
+
+// Downvote
+app.get('/downvote', async function(req, res) {
+    if (req.session.username !== '!!') { 
+        var post = await Post.findOne({ postId: req.query.postId })
+        var username = req.session.username
+
+        var indexInUpvotes = post.upvotes.indexOf(username);
+        var indexInDownvotes = post.downvotes.indexOf(username);
+
+        if (indexInUpvotes === -1 && indexInDownvotes === -1) {
+            // If username is not in post.upvotes[] nor in post.downvotes[]
+            post.downvotes.push(username);
+        } else if (indexInUpvotes !== -1) {
+            // If username is already in post.upvotes[]
+            post.upvotes.splice(indexInUpvotes, 1);
+            post.downvotes.push(username);
+        } else if (indexInDownvotes !== -1) {
+            // If username is already in post.downvotes[]
+            post.downvotes.splice(indexInDownvotes, 1);
+        }
+
+        await post.save();
+        res.redirect('/post?postId=' + req.query.postId)
+    }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var server = app.listen(3000, function() {
+    console.log("Node server running on port 3000");
 });
