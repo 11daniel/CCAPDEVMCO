@@ -1,27 +1,14 @@
 Github directory: https://github.com/11daniel/CCAPDEVMCO
 
-CCAPDEV FOLDER:
-- public folder
-	- css folder
-		- CSS FILES
-	- js folder
-		- JS FILES
-	- media folder
-		- IMAGES
-- views folder
-	- HBS FILES
-- HTML FILES
-- JSON FILES
-- index.js
 
 Run procedure:
 cmd the project directory
 
-type
+type npm init -y
 
-npm init -y
 then
 npm install hbs mongoose express express-session express-fileupload cookie-parser mongodb connect-mongo
+
 then
 node index.js
 
