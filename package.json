@@ -18,5 +18,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "The MCO is a web application built with Node.js, Express, Handlebars, and MongoDB. It demonstrates a froum website along with extra features to allow for file upload, session management, and cookie handling."
 }

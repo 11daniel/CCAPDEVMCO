@@ -519,11 +519,13 @@ app.get('/downvote', async function(req, res) {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
+
 var server = app.listen(3000, function() {
     console.log("Node server running on port 3000");
-});*/
+});
 
-var server = app.listen(port, () => {
+/*
+var server = app.listen(port, function()  {
   console.log(`Node server running on port ${port}`)
-})
+});
+*/
