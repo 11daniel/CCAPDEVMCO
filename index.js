@@ -9,7 +9,7 @@
 var mongoose = require('mongoose');
 var express = require('express');
 var app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 3000;
 
 
 mongoose.connect('mongodb://localhost/ccappdevDB');
