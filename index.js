@@ -28,6 +28,9 @@ const User = require("./models/User");
 
 const path = require('path');
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 const hbs = require('hbs')
 app.set('view engine','hbs');
 
