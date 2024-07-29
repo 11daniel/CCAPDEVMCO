@@ -13,7 +13,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
-mongoose.connect('mongodb://localhost/ccappdevDB');
+mongoose.connect('mongodb://localhost/ccappdevDB', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
 app.use('/stylesheets', express.static(__dirname + '/stylesheets'));
 app.use('/images', express.static(__dirname + '/images'));
