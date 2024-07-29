@@ -9,6 +9,7 @@
 var mongoose = require('mongoose');
 var express = require('express');
 var app = express();
+const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 10000;
 
 
@@ -26,6 +27,8 @@ var Comment = require("./models/Comment");
 var User = require("./models/User");
 
 var path = require('path');
+
+app.use(cookieParser());
 
 var hbs = require('hbs')
 app.set('view engine','hbs');
