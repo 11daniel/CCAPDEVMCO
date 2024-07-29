@@ -9,7 +9,6 @@
 var mongoose = require('mongoose');
 var express = require('express');
 var app = express();
-const cookieParser = require("cookie-parser");
 
 mongoose.connect('mongodb://localhost/ccappdevDB');
 
@@ -17,7 +16,7 @@ app.use('/stylesheets', express.static(__dirname + '/stylesheets'));
 app.use('/images', express.static(__dirname + '/images'));
 app.use(express.static(__dirname));
 
-var fileUpload = require('express-fileupload');;
+var fileUpload = require('express-fileupload')
 
 var Post = require("./models/Post");
 var Community = require("./models/Community");
@@ -25,8 +24,6 @@ var Comment = require("./models/Comment");
 var User = require("./models/User");
 
 var path = require('path');
-
-app.use(cookieParser());
 
 var hbs = require('hbs')
 app.set('view engine','hbs');
