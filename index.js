@@ -9,6 +9,8 @@
 var mongoose = require('mongoose');
 var express = require('express');
 var app = express();
+const port = process.env.PORT || 4000;
+
 
 mongoose.connect('mongodb://localhost/ccappdevDB');
 
@@ -514,7 +516,11 @@ app.get('/downvote', async function(req, res) {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/*
 var server = app.listen(3000, function() {
     console.log("Node server running on port 3000");
-});
+});*/
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
