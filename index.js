@@ -10,8 +10,6 @@ var mongoose = require('mongoose');
 var express = require('express');
 var app = express();
 const cookieParser = require("cookie-parser");
-const port = process.env.PORT || 10000;
-
 
 mongoose.connect('mongodb://localhost/ccappdevDB');
 
@@ -19,7 +17,7 @@ app.use('/stylesheets', express.static(__dirname + '/stylesheets'));
 app.use('/images', express.static(__dirname + '/images'));
 app.use(express.static(__dirname));
 
-var fileUpload = require('express-fileupload')
+var fileUpload = require('express-fileupload');;
 
 var Post = require("./models/Post");
 var Community = require("./models/Community");
@@ -523,9 +521,3 @@ app.get('/downvote', async function(req, res) {
 var server = app.listen(3000, function() {
     console.log("Node server running on port 3000");
 });
-
-/*
-var server = app.listen(port, function()  {
-  console.log(`Node server running on port ${port}`)
-});
-*/
