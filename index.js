@@ -6,9 +6,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var mongoose = require('mongoose');
-var express = require('express');
-var app = express();
+const mongoose = require('mongoose');
+const express = require('express');
+const app = express();
+
+const port = process.env.PORT || 3000;
+const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 mongoose.connect('mongodb://localhost/ccappdevDB');
 
@@ -16,16 +19,16 @@ app.use('/stylesheets', express.static(__dirname + '/stylesheets'));
 app.use('/images', express.static(__dirname + '/images'));
 app.use(express.static(__dirname));
 
-var fileUpload = require('express-fileupload')
+const fileUpload = require('express-fileupload')
 
-var Post = require("./models/Post");
-var Community = require("./models/Community");
-var Comment = require("./models/Comment");
-var User = require("./models/User");
+const Post = require("./models/Post");
+const Community = require("./models/Community");
+const Comment = require("./models/Comment");
+const User = require("./models/User");
 
-var path = require('path');
+const path = require('path');
 
-var hbs = require('hbs')
+const hbs = require('hbs')
 app.set('view engine','hbs');
 
 app.use(express.json()); // use json
@@ -33,8 +36,8 @@ app.use(express.urlencoded({extended: true})); // files consist of more than str
 app.use(express.static('public')); // we'll add a static directory named "public"
 app.use(fileUpload()); // for fileuploads
 
-var session = require('express-session');
-var MongoStore = require('connect-mongo');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 
 hbs.registerHelper('calculateVotes', function(upvotes, downvotes) {
     return upvotes.length - downvotes.length;
@@ -514,7 +517,7 @@ app.get('/downvote', async function(req, res) {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/*
 var server = app.listen(3000, function() {
     console.log("Node server running on port 3000");
-});
+});*/
