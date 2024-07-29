@@ -15,7 +15,8 @@ const server = app.listen(port, () => console.log(`Example app listening on port
 
 mongoose.connect('mongodb://localhost/ccappdevDB', {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  strictQuery: false
 });
 
 app.use('/stylesheets', express.static(__dirname + '/stylesheets'));
