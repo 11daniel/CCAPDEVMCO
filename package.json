@@ -7,7 +7,7 @@
     "express-session": "^1.18.0",
     "hbs": "^4.2.0",
     "mongodb": "^6.8.0",
-    "mongoose": "^6.10.1"
+    "mongoose": "^8.5.1"
   },
   "name": "ccapdevmco",
   "version": "1.0.0",
