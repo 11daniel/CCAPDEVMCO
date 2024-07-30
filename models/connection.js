@@ -5,9 +5,8 @@ const options = { useNewUrlParser: true,
     useNewUrlParser: true,
     useUnifiedTopology: true,
 };
-
 try{
-    mongoose.connect(dbURL,options)
+    mongoose.connect(dbURL)
     console.log("Connected to PEAKYDB");
 }catch(err){
     console.log("ERROR CONNECTING TO PEAKYDB: ");
