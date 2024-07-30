@@ -1,6 +1,12 @@
-# CCAPPDEV MCO
+<h1 align="center">Peaky Coders</h1>
+<div align="center">
+<i>"The Website Made For Coders"</i>    
+</div>
+<br>
+<p>
+The MCO is a web application built with Node.js, Express, Handlebars, and MongoDB. It demonstrates the basics of a froum website along with extra features to allow for file upload, session management, and cookie handling.
+</p>
 
-The MCO is a web application built with Node.js, Express, Handlebars, and MongoDB. It demonstrates a froum website along with extra features to allow for file upload, session management, and cookie handling.
 
 # Table of Contents
 
@@ -41,12 +47,12 @@ To run the application, use the following command:
 node index.js
 ```
 ## Dependencies
-Express - Fast, unopinionated, minimalist web framework for Node.js </br>
-Handlebars - Simple templating language </br>
-Mongoose - Elegant MongoDB object modeling for Node.js </br>
-express-session - Simple session middleware for Express </br>
-express-fileupload - Simple express middleware for uploading files </br>
-cookie-parser - Parse Cookie header and populate req.cookies </br>
-MongoDB - NoSQL database for modern applications </br>
-connect-mongo - MongoDB session store for Express </br>
+- Express - Fast, unopinionated, minimalist web framework for Node.js. </br>
+- Handlebars - Simple templating language. </br>
+- Mongoose - Elegant MongoDB object modeling for Node.js. </br>
+- Express-session - Simple session middleware for Express. </br>
+- Express-fileupload - Simple express middleware for uploading files. </br>
+- Cookie-parser - Parse Cookie header and populate req.cookies. </br>
+- MongoDB - NoSQL database for modern applications. </br>
+- Handlebars - Display and format data presentably.  </br>
 
