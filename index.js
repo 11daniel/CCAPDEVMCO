@@ -10,14 +10,12 @@ const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
 
-const port = process.env.PORT || 3000;
-const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+//require DB
+const connection = require("./models/connection");
 
-mongoose.connect('mongodb://localhost/ccappdevDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  strictQuery: false
-});
+const { envPort, sessionKey } = require('./config');
+const port = envPort;
+const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 app.use('/stylesheets', express.static(__dirname + '/stylesheets'));
 app.use('/images', express.static(__dirname + '/images'));
@@ -127,7 +125,7 @@ hbs.registerHelper('downvotes', function(downvotes, username) {
 //Session
 app.use(
     session({
-        secret: 'hello',
+        secret: sessionKey,
         resave: false,
         saveUninitialized: false,
         cookie: {
