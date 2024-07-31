@@ -1,16 +1,13 @@
 const mongoose = require('mongoose');
 const { dbURL } = require('../config');
 
-mongoose.connect(dbURL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-const db = mongoose.connection;
-
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', () => {
-  console.log('Connected to MongoDB');
-});
-
-module.exports = db;
+const options = { useNewUrlParser: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+};
+try{
+    mongoose.connect(dbURL,options)
+    console.log("Connected to PEAKYDB");
+}catch(err){
+    console.log("ERROR CONNECTING TO PEAKYDB: ");
+    }
