@@ -1,3 +1,5 @@
+// index.js
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // App stuff
@@ -125,7 +127,7 @@ hbs.registerHelper('downvotes', function(downvotes, username) {
     }
 });
 
-//Session
+// Session
 app.use(
     session({
         secret: sessionKey,
@@ -137,11 +139,12 @@ app.use(
             maxAge: 3 * 7 * 24 * 60 * 60 * 1000
         },
         store: MongoStore.create({ 
-            mongoUrl: dbURL,
+            mongoUrl: process.env.MONGODB_CONNECT_URI,
             collectionName: 'sessions' 
         })
     })
 );
+
 
 // Set username value after logging in
 app.post('/submit-login', async function(req, res) {
@@ -257,201 +260,275 @@ app.post('/submit-comment', async function(req, res) {
 
         var latestComment = await Comment.findOne().sort({ commentId: -1 });
         var newCommentId = latestComment ? latestComment.commentId + 1 : 1;
+        
+        var parentId = req.query.parentId ? Number(req.query.parentId) : null; 
+
+        var level = parentId ? await calculateCommentLevel(parentId) + 1 : 0; 
 
         await Comment.create({
             commentId: newCommentId,
             date: formattedDate,
-            postId: postId,
             user: req.session.username,
-            upvotes: [],
-            downvotes: [],
+            postId: postId,
+            parentId: parentId,
+            level: level, 
             edited: 0,
             ...req.body,
         });
-        res.redirect(`/posts?postId=${postId}`);
+        res.redirect('/post?postId=' + postId);
     } else {
-        res.redirect(`/posts?postId=${postId}`);
+        res.redirect('/post?postId=' + postId)
     }
+});
+
+async function calculateCommentLevel(commentId) {
+    var comment = await Comment.findOne({ commentId: commentId }).exec();
+    if (!comment) {
+        return -1; // Comment not found
+    }
+    if (!comment.parentId) {
+        return 0; // Top-level comment
+    }
+    // Recursive call to find the parent comment's level
+    var parentLevel = await calculateCommentLevel(comment.parentId);
+    return parentLevel + 1;
+}
+
+function sortComments(comments) {
+    comments.sort((a, b) => b.commentId - a.commentId);
+    var commentsByParentId = new Map();
+
+    comments.forEach(comment => {
+        var parentId = comment.parentId || 0; 
+        if (!commentsByParentId.has(parentId)) {
+            commentsByParentId.set(parentId, []);
+        }
+        commentsByParentId.get(parentId).push(comment);
+    });
+
+    var sortedComments = [];
+    function addComments(parentId) {
+        var comments = commentsByParentId.get(parentId) || [];
+        comments.forEach(comment => {
+            sortedComments.push(comment);
+            addComments(comment.commentId); 
+        });
+    }
+    addComments(0); 
+
+    return sortedComments;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Delete/edit from db
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Edit post/comment
+app.post('/edit', async function(req, res) {
+    var commentId = req.query.commentId
+    var postId = req.query.postId
+    var content = req.body.content
+
+    if (commentId) {
+        var comment = await Comment.findOne({commentId: commentId})
+        await Comment.findOneAndUpdate({ commentId: commentId }, { content: content, edited: 1 })
+        res.redirect('/post?postId=' + comment.postId)
+
+    } else if (postId) {
+        var post = await Post.findOne({postId: postId})
+        await Post.findOneAndUpdate({ postId: postId}, { content: content, edited: 1 })
+        res.redirect('/post?postId=' + post.postId)
+    }
+});
+
+// Delete post/comment
+app.get('/delete', async function(req, res) {
+    var commentId = req.query.commentId
+    var postId = req.query.postId
+
+    if (commentId) {
+        var comment = await Comment.findOne({commentId: commentId})
+        await Comment.findOneAndUpdate({ commentId: commentId }, { content: '(Comment has been deleted)' })
+        res.redirect('/post?postId=' + comment.postId)
+
+    } else if (postId) {
+        await Post.findOneAndDelete({ postId: postId})
+        await Comment.deleteMany({ postId: postId })
+        res.redirect('/home')
+    }
+});
+
+// Edit profile
+app.post('/submit-edit-profile', async function(req, res) {
+    var username = req.session.username
+    var updates = {}
+
+    if (req.files && req.files.image) {
+        var { image } = req.files
+        await image.mv(path.resolve(__dirname, 'images', image.name));
+        updates.img = image.name
+    }
+
+    if (req.body.description) {
+        updates.description = req.body.description
+    }
+
+    await User.findOneAndUpdate({ username: username }, updates)
+
+    res.redirect('/profile');
 });
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Modify stuff in db 
+// Render stuff 
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Save post edits
-app.post('/save-post', async function(req, res) {
-    var { postId, title, content, community } = req.body;
-    var post = await Post.findOneAndUpdate(
-        { postId: postId },
-        { $set: { title: title, content: content, community: community, edited: 1 } }
-    );
-    res.redirect('/home')
-});
-
-// Save comment edits
-app.post('/save-comment', async function(req, res) {
-    var { commentId, postId, content } = req.body;
-    var comment = await Comment.findOneAndUpdate(
-        { commentId: commentId },
-        { $set: { content: content, edited: 1 } }
-    );
-    res.redirect(`/posts?postId=${postId}`);
-});
-
-// Upvote post
-app.post('/upvote-post', async function(req, res) {
-    var postId = Number(req.query.postId);
-    var post = await Post.findOne({ postId: postId });
-    if (post.downvotes.includes(req.session.username)) {
-        await Post.updateOne(
-            { postId: postId },
-            { $pull: { downvotes: req.session.username } }
-        );
-    }
-
-    if (!post.upvotes.includes(req.session.username)) {
-        await Post.updateOne(
-            { postId: postId },
-            { $push: { upvotes: req.session.username } }
-        );
+app.get('/home', async function(req,res) {
+    var communities = await Community.find({})
+    if (req.session.username !== '!!') {
+        var posts = await Post.find({})
+        var user = await User.findOne({ username: req.session.username })
+        console.log(user)
+        res.render('home', { posts, user, communities })
     } else {
-        await Post.updateOne(
-            { postId: postId },
-            { $pull: { upvotes: req.session.username } }
-        );
+        var posts = await Post.find({}).sort({ createdAt: -1 }).limit(20)
+        var user = guest
+        res.render('home', { posts, user, communities })
     }
-
-    res.redirect(`/posts?postId=${postId}`);
 });
 
-// Downvote post
-app.post('/downvote-post', async function(req, res) {
-    var postId = Number(req.query.postId);
-    var post = await Post.findOne({ postId: postId });
-    if (post.upvotes.includes(req.session.username)) {
-        await Post.updateOne(
-            { postId: postId },
-            { $pull: { upvotes: req.session.username } }
-        );
-    }
+app.get('/post', async function(req, res) {
+    var postId = Number(req.query.postId)
+    var post = await Post.findOne({ postId: postId })
+    var comments = await Comment.find({ postId: postId })
+    
+    comments = sortComments(comments);
 
-    if (!post.downvotes.includes(req.session.username)) {
-        await Post.updateOne(
-            { postId: postId },
-            { $push: { downvotes: req.session.username } }
-        );
+    if (req.session.username !== '!!') { 
+        var user = await User.findOne({ username: req.session.username })
     } else {
-        await Post.updateOne(
-            { postId: postId },
-            { $pull: { downvotes: req.session.username } }
-        );
+        var user = guest
     }
-
-    res.redirect(`/posts?postId=${postId}`);
+    res.render('post', { post, comments, user })
 });
 
-// Upvote comment
-app.post('/upvote-comment', async function(req, res) {
-    var commentId = Number(req.query.commentId);
-    var postId = Number(req.query.postId);
-    var comment = await Comment.findOne({ commentId: commentId });
-    if (comment.downvotes.includes(req.session.username)) {
-        await Comment.updateOne(
-            { commentId: commentId },
-            { $pull: { downvotes: req.session.username } }
-        );
+app.get('/create-post', async function(req, res) {
+    if (req.session.username !== '!!') { 
+        var communities = await Community.find({})
+        var user = await User.findOne({ username: req.session.username })
+        res.render('create-post', { communities, user })
     }
+});
 
-    if (!comment.upvotes.includes(req.session.username)) {
-        await Comment.updateOne(
-            { commentId: commentId },
-            { $push: { upvotes: req.session.username } }
-        );
+app.get('/profile', async function(req, res) {
+    var username
+    if (req.query.username) {
+        username = req.query.username
+    } else if (req.session.username !== '!!') {
+        username = req.session.username
     } else {
-        await Comment.updateOne(
-            { commentId: commentId },
-            { $pull: { upvotes: req.session.username } }
-        );
+        return
     }
+    console.log('username: ' + username)
+    var posts = await Post.find({ user: username })
+    var comments = await Comment.find({ user: username })
+    var user = await User.findOne({ username: username })
+    res.render('profile', { posts, comments, user })
 
-    res.redirect(`/posts?postId=${postId}`);
 });
 
-// Downvote comment
-app.post('/downvote-comment', async function(req, res) {
-    var commentId = Number(req.query.commentId);
-    var postId = Number(req.query.postId);
-    var comment = await Comment.findOne({ commentId: commentId });
-    if (comment.upvotes.includes(req.session.username)) {
-        await Comment.updateOne(
-            { commentId: commentId },
-            { $pull: { upvotes: req.session.username } }
-        );
-    }
+app.get('/community', async function(req, res) {
+    var communityName = '#' + req.query.community
+    console.log('communityName: ' + communityName)
 
-    if (!comment.downvotes.includes(req.session.username)) {
-        await Comment.updateOne(
-            { commentId: commentId },
-            { $push: { downvotes: req.session.username } }
-        );
-    } else {
-        await Comment.updateOne(
-            { commentId: commentId },
-            { $pull: { downvotes: req.session.username } }
-        );
-    }
+    var community = await Community.findOne({ name: communityName})
+    var posts = await Post.find({ community: communityName })
+    var user = await User.findOne({ username: req.session.username })
 
-    res.redirect(`/posts?postId=${postId}`);
+    console.log('community: ' + community, 'posts: ' + posts)
+
+    res.render('community', { community, posts, user })    
 });
 
+app.get('/edit-profile', async function(req, res) {
+    var user = await User.findOne({ username: req.session.username })
+    res.render('edit-profile', { user })
+});
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Render stuff
-//
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Register pages
-app.get('/register', function(req, res) {
+app.get('/register', async function(req, res) {
     res.render('register');
 });
 
-// Profile pages
-app.get('/profile', async function(req, res) {
-    var userId = req.query.userId;
-    if (userId) {
-        var user = await User.findOne({ _id: userId });
-        if (user) {
-            var posts = await Post.find({ user: user.username });
-            var communities = await Community.find({});
-            res.render('profile', { user: user, posts: posts, communities: communities });
-        } else {
-            res.status(404).send('User not found');
+app.get('/create-community', async function(req, res) {
+    if (req.session.username !== '!!') { 
+        res.render('create-community');
+    }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                           //
+//                                      UPVOTES AND DOWNVOTES                                                //
+//                                                                                                           //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Upvote
+app.get('/upvote', async function(req, res) {
+    if (req.session.username !== '!!') { 
+        var post = await Post.findOne({ postId: req.query.postId })
+        var username = req.session.username
+
+        var indexInUpvotes = post.upvotes.indexOf(username);
+        var indexInDownvotes = post.downvotes.indexOf(username);
+
+        if (indexInUpvotes === -1 && indexInDownvotes === -1) {
+            // If username is not in post.upvotes[] nor in post.downvotes[]
+            post.upvotes.push(username);
+        } else if (indexInUpvotes !== -1) {
+            // If username is already in post.upvotes[]
+            post.upvotes.splice(indexInUpvotes, 1);
+        } else if (indexInDownvotes !== -1) {
+            // If username is already in post.downvotes[]
+            post.downvotes.splice(indexInDownvotes, 1);
+            post.upvotes.push(username);
         }
-    } else {
-        res.status(400).send('UserId parameter is required');
+
+        await post.save();
+        res.redirect('/post?postId=' + req.query.postId)
     }
 });
 
-// Post pages
-app.get('/posts', async function(req, res) {
-    var postId = req.query.postId;
-    var communities = await Community.find({});
-    if (postId) {
-        var post = await Post.findOne({ postId: postId });
-        var comments = await Comment.find({ postId: postId });
-        res.render('posts', { post: post, comments: comments, communities: communities });
-    } else {
-        res.status(404).send('Post not found');
+// Downvote
+app.get('/downvote', async function(req, res) {
+    if (req.session.username !== '!!') { 
+        var post = await Post.findOne({ postId: req.query.postId })
+        var username = req.session.username
+
+        var indexInUpvotes = post.upvotes.indexOf(username);
+        var indexInDownvotes = post.downvotes.indexOf(username);
+
+        if (indexInUpvotes === -1 && indexInDownvotes === -1) {
+            // If username is not in post.upvotes[] nor in post.downvotes[]
+            post.downvotes.push(username);
+        } else if (indexInUpvotes !== -1) {
+            // If username is already in post.upvotes[]
+            post.upvotes.splice(indexInUpvotes, 1);
+            post.downvotes.push(username);
+        } else if (indexInDownvotes !== -1) {
+            // If username is already in post.downvotes[]
+            post.downvotes.splice(indexInDownvotes, 1);
+        }
+
+        await post.save();
+        res.redirect('/post?postId=' + req.query.postId)
     }
 });
 
-// Home page
-app.get('/home', async function(req, res) {
-    var communities = await Community.find({});
-    var posts = await Post.find({});
-    res.render('home', { posts: posts, communities: communities });
-});
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+var server = app.listen(3000, function() {
+    console.log("Node server running on port 3000");
+});*/
