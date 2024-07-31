@@ -13,8 +13,8 @@ const app = express();
 //require DB
 const connection = require("./models/connection");
 
-const { envPort, dbURL, sessionKey } = require('./config');
-const port = envPort || 3000; // Default to port 3000 if not set
+const { envPort, sessionKey } = require('./config');
+const port = envPort;
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 app.use('/stylesheets', express.static(__dirname + '/stylesheets'));
@@ -43,11 +43,6 @@ app.use(fileUpload()); // for fileuploads
 
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-
-// Connect to MongoDB
-mongoose.connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch(err => console.error('Could not connect to MongoDB Atlas', err));
 
 hbs.registerHelper('calculateVotes', function(upvotes, downvotes) {
     return upvotes.length - downvotes.length;
@@ -127,7 +122,7 @@ hbs.registerHelper('downvotes', function(downvotes, username) {
     }
 });
 
-// Session
+//Session
 app.use(
     session({
         secret: sessionKey,
@@ -139,12 +134,11 @@ app.use(
             maxAge: 3 * 7 * 24 * 60 * 60 * 1000
         },
         store: MongoStore.create({ 
-            mongoUrl: process.env.MONGODB_CONNECT_URI,
+            mongoUrl: 'mongodb://localhost/ccappdevDB',
             collectionName: 'sessions' 
         })
     })
 );
-
 
 // Set username value after logging in
 app.post('/submit-login', async function(req, res) {
