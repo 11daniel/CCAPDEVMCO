@@ -13,8 +13,8 @@ const app = express();
 //require DB
 const connection = require("./models/connection");
 
-const { envPort, sessionKey } = require('./config');
-const port = envPort;
+const { envPort, dbURL, sessionKey } = require('./config');
+const port = envPort || 3000; // Default to port 3000 if not set
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 app.use('/stylesheets', express.static(__dirname + '/stylesheets'));
@@ -43,6 +43,11 @@ app.use(fileUpload()); // for fileuploads
 
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+
+// Connect to MongoDB
+mongoose.connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB Atlas'))
+  .catch(err => console.error('Could not connect to MongoDB Atlas', err));
 
 hbs.registerHelper('calculateVotes', function(upvotes, downvotes) {
     return upvotes.length - downvotes.length;
