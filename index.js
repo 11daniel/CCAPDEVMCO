@@ -122,7 +122,7 @@ hbs.registerHelper('downvotes', function(downvotes, username) {
     }
 });
 
-//Session
+// Session
 app.use(
     session({
         secret: sessionKey,
@@ -134,11 +134,12 @@ app.use(
             maxAge: 3 * 7 * 24 * 60 * 60 * 1000
         },
         store: MongoStore.create({ 
-            mongoUrl: 'mongodb://localhost/ccappdevDB',
+            mongoUrl: process.env.MONGODB_CONNECT_URI,
             collectionName: 'sessions' 
         })
     })
 );
+
 
 // Set username value after logging in
 app.post('/submit-login', async function(req, res) {
