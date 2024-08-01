@@ -13,7 +13,7 @@ const app = express();
 //require DB
 const connection = require("./models/connection");
 
-const { envPort, sessionKey } = require('./config');
+const { dbURL, envPort, sessionKey } = require('./config');
 const port = envPort;
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
@@ -134,7 +134,7 @@ app.use(
             maxAge: 3 * 7 * 24 * 60 * 60 * 1000
         },
         store: MongoStore.create({ 
-            mongoUrl: 'mongodb://localhost/ccappdevDB',
+            mongoUrl: 'dbURL',
             collectionName: 'sessions' 
         })
     })
