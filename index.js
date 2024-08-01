@@ -134,7 +134,7 @@ app.use(
             maxAge: 3 * 7 * 24 * 60 * 60 * 1000
         },
         store: MongoStore.create({ 
-            mongoUrl: 'dbURL',
+            mongoUrl: dbURL,
             collectionName: 'sessions' 
         })
     })
