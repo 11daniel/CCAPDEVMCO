@@ -15,7 +15,7 @@ const connection = require("./models/connection");
 
 const { dbURL, envPort, sessionKey } = require('./config');
 const port = envPort;
-const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+const server = app.listen(port, () => console.log(`PeakyDB listening on port ${port}!`));
 
 app.use('/stylesheets', express.static(__dirname + '/stylesheets'));
 app.use('/images', express.static(__dirname + '/images'));
@@ -522,7 +522,3 @@ app.get('/downvote', async function(req, res) {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-var server = app.listen(3000, function() {
-    console.log("Node server running on port 3000");
-});*/
