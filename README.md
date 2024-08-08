@@ -18,10 +18,9 @@ The MCO is a web application built with Node.js, Express, Handlebars, and MongoD
 Section: S13 </br>
 Course: CCAPDEV </br>
 Contributors:
-- Benjamin Florence Saludes
 - Carlo San Buenaventura
 - Daniel Gavrie Clemente
-- Joshua Laxa
+- Joshua Alexander Laxa
 ## Installation
 
 To get a local copy up and running, follow these simple steps.
