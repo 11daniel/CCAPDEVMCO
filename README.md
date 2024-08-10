@@ -1,4 +1,4 @@
-<h1 align="center">[Peaky Coders](https://peaky-coders.onrender.com/)</h1>
+<h1 align="center">Peaky Coders</h1>
 <div align="center">
 <i>"The Website Made For Coders"</i>    
 </div>
@@ -55,3 +55,5 @@ node index.js
 - MongoDB - NoSQL database for modern applications. </br>
 - Handlebars - Display and format data presentably.  </br>
 
+## Link
+- [Peaky Coders](https://peaky-coders.onrender.com/)
